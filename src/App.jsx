@@ -16,6 +16,8 @@ import {
 } from "./utils/demoTheme";
 
 import { useTranslation } from "react-i18next";
+import Staff from "./pages/Staff";
+import Tables from "./pages/Tables";
 
 // Placeholder components for other pages
 const Dashboard = () => {
@@ -24,55 +26,6 @@ const Dashboard = () => {
     <div className="dashboard-content">
       <h1>{t("dashboard.welcome")}</h1>
       <p>{t("dashboard.welcome_subtitle")}</p>
-
-      {/* Theme Demo Section */}
-      <div className="theme-demo">
-        <h2>{t("settings.theme_demo")}</h2>
-        <p>{t("settings.theme_demo_desc")}</p>
-
-        <div className="theme-controls">
-          <h3>{t("settings.test_themes")}</h3>
-          <div className="theme-buttons">
-            <button
-              onClick={() => simulateRestaurantLogin()}
-              className="demo-btn primary"
-            >
-              {t("settings.simulate_login")}
-            </button>
-            {testThemes.map((theme, index) => (
-              <button
-                key={theme.name}
-                onClick={() => applyTestTheme(index)}
-                className="demo-btn"
-                style={{ background: theme.theme.primaryColor, color: "white" }}
-              >
-                {theme.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="color-showcase">
-          <div className="color-card primary">
-            <h3>{t("settings.primary_color")}</h3>
-            <p>{t("settings.primary_color_desc")}</p>
-          </div>
-          <div className="color-card secondary">
-            <h3>{t("settings.secondary_color")}</h3>
-            <p>{t("settings.secondary_color_desc")}</p>
-          </div>
-          <div className="color-card accent">
-            <h3>{t("settings.accent_color")}</h3>
-            <p>{t("settings.accent_color_desc")}</p>
-          </div>
-        </div>
-
-        <div className="button-showcase">
-          <button className="btn-primary">Primary Button</button>
-          <button className="btn-secondary">Secondary Button</button>
-          <button className="btn-accent">Accent Button</button>
-        </div>
-      </div>
 
       <div className="stats-grid">
         <div className="card">
@@ -246,14 +199,8 @@ function App() {
                   path="/menu"
                   element={<div>Menu Page (Implementation pending)</div>}
                 />
-                <Route
-                  path="/tables"
-                  element={<div>Tables Page (Implementation pending)</div>}
-                />
-                <Route
-                  path="/staff"
-                  element={<div>Staff Page (Implementation pending)</div>}
-                />
+                <Route path="/tables" element={<Tables />} />
+                <Route path="/staff" element={<Staff />} />
                 <Route
                   path="/inventory"
                   element={<div>Inventory Page (Implementation pending)</div>}

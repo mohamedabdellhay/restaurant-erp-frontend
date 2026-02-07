@@ -37,6 +37,21 @@ const Settings = () => {
   const restaurantData = getRestaurantData();
   const [formData, setFormData] = useState(restaurantData);
 
+  // Check if current theme matches any preset
+  const getCurrentPresetTheme = () => {
+    if (!formData.settings?.theme) return null;
+
+    const currentTheme = formData.settings.theme;
+    return presetThemes.findIndex(
+      (preset) =>
+        preset.theme.primaryColor === currentTheme.primaryColor &&
+        preset.theme.secondaryColor === currentTheme.secondaryColor &&
+        preset.theme.accentColor === currentTheme.accentColor,
+    );
+  };
+
+  const currentPresetIndex = getCurrentPresetTheme();
+
   useEffect(() => {
     if (restaurantData?.settings?.theme?.logo) {
       setLogoPreview(restaurantData.settings.theme.logo);
@@ -157,7 +172,10 @@ const Settings = () => {
         console.log("Backend returned logo URL:", newLogoUrl);
 
         // Clean up any malformed URLs with duplicate base URLs
-        if (newLogoUrl && newLogoUrl.includes("http://localhost:3000http://localhost:3000")) {
+        if (
+          newLogoUrl &&
+          newLogoUrl.includes("http://localhost:3000http://localhost:3000")
+        ) {
           // Extract just the path part after all the duplicates
           const match = newLogoUrl.match(/\/uploads\/.*$/);
           if (match) {
@@ -495,7 +513,7 @@ const Settings = () => {
                     onChange={handleLogoUpload}
                     disabled={uploadingLogo}
                     id="logo-upload"
-                    style={{ display: 'none' }}
+                    style={{ display: "none" }}
                   />
 
                   <div className="logo-preview-container">
@@ -582,7 +600,7 @@ const Settings = () => {
                     <button
                       key={index}
                       type="button"
-                      className="preset-btn"
+                      className={`preset-btn ${currentPresetIndex === index ? "active" : ""}`}
                       onClick={() => handlePresetThemeSelect(preset)}
                       title={preset.name}
                     >
@@ -596,6 +614,11 @@ const Settings = () => {
                           className="preset-accent-dot"
                           style={{ backgroundColor: preset.theme.accentColor }}
                         ></div>
+                        {currentPresetIndex === index && (
+                          <div className="preset-selected-indicator">
+                            <Check size={16} />
+                          </div>
+                        )}
                       </div>
                       <span>{preset.name}</span>
                     </button>
@@ -1296,6 +1319,18 @@ const Settings = () => {
           box-shadow: var(--shadow-sm);
         }
 
+        .preset-btn.active {
+          border-color: var(--primary);
+          background: color-mix(in srgb, var(--primary) 5%, transparent);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 20%, transparent);
+        }
+
+        .preset-btn.active span {
+          color: var(--primary);
+          font-weight: 600;
+        }
+
         .preset-preview {
           width: 50px;
           height: 50px;
@@ -1304,6 +1339,22 @@ const Settings = () => {
           overflow: hidden;
           border: 2px solid white;
           box-shadow: 0 0 0 1px var(--border-color);
+        }
+
+        .preset-selected-indicator {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: white;
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          color: var(--primary);
         }
 
         .preset-accent-dot {

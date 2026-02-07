@@ -23,8 +23,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const { getRestaurantName, getThemeColors } = useRestaurant();
   const { t, i18n } = useTranslation();
 
+  // Get theme colors for dynamic styling
+  const themeColors = getThemeColors();
+  const primaryColor = themeColors.primary || "#f59e0b";
+  const secondaryColor = themeColors.secondary || "#6366f1";
+  const accentColor = themeColors.accent || "#10b981";
+
   // Debug logging
-  console.log("Sidebar - themeColors:", getThemeColors());
+  console.log("Sidebar - themeColors:", themeColors);
 
   const menuItems = [
     { name: t("nav.dashboard"), icon: LayoutDashboard, path: "/dashboard" },
@@ -142,18 +148,19 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         }
 
         .logo-text span {
-          color: var(--primary);
+          color: ${primaryColor};
         }
 
         .toggle-btn {
           color: var(--text-secondary);
           padding: 0.25rem;
           border-radius: var(--radius-sm);
-          transition: background 0.2s;
+          transition: all 0.2s;
         }
 
         .toggle-btn:hover {
-          background: rgba(255, 255, 255, 0.05);
+          background: ${primaryColor}15;
+          color: ${primaryColor};
         }
 
         .toggle-btn .rotate {
@@ -176,6 +183,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           gap: 1rem;
           transition: all 0.2s;
           border-left: 3px solid transparent;
+          position: relative;
         }
 
         [dir='rtl'] .nav-link {
@@ -189,19 +197,54 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         }
 
         .nav-link:hover {
-          background: rgba(245, 158, 11, 0.05);
-          color: var(--primary);
+          background: ${primaryColor}10;
+          color: ${primaryColor};
+          transform: translateX(2px);
+        }
+
+        [dir='rtl'] .nav-link:hover {
+          transform: translateX(-2px);
         }
 
         .nav-link.active {
-          background: rgba(245, 158, 11, 0.1);
-          color: var(--primary);
-          border-left-color: var(--primary);
+          background: linear-gradient(90deg, ${primaryColor}15, transparent);
+          color: ${primaryColor};
+          border-left-color: ${primaryColor};
+          font-weight: 600;
         }
-        
+
         [dir='rtl'] .nav-link.active {
           border-left-color: transparent;
-          border-right-color: var(--primary);
+          border-right-color: ${primaryColor};
+        }
+
+        .nav-link.active::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 3px;
+          background: ${primaryColor};
+          box-shadow: 0 0 8px ${primaryColor}40;
+        }
+
+        [dir='rtl'] .nav-link.active::before {
+          left: auto;
+          right: 0;
+        }
+
+        .nav-link svg {
+          transition: all 0.2s;
+        }
+
+        .nav-link:hover svg {
+          transform: scale(1.1);
+        }
+
+        .nav-link.active svg {
+          color: ${primaryColor};
+          filter: drop-shadow(0 0 4px ${primaryColor}40);
         }
 
         .sidebar-footer {
@@ -215,8 +258,50 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         }
 
         .logout-btn:hover {
-          color: #ef4444;
-          background: rgba(239, 68, 68, 0.05);
+          color: var(--danger);
+          background: var(--danger)15;
+          transform: translateX(2px);
+        }
+
+        [dir='rtl'] .logout-btn:hover {
+          transform: translateX(-2px);
+        }
+
+        .logout-btn:hover svg {
+          color: var(--danger);
+          transform: scale(1.1);
+        }
+
+        /* Theme-specific sidebar background */
+        .sidebar {
+          background: linear-gradient(180deg, var(--bg-sidebar) 0%, var(--bg-base) 100%);
+        }
+
+        /* Active state animation */
+        .nav-link.active {
+          animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        [dir='rtl'] @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
       `}</style>
     </aside>
