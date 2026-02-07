@@ -1,18 +1,24 @@
-import { Menu, Search, Bell, User, Sun, Moon, Languages } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import { useTranslation } from 'react-i18next';
+import { Menu, Search, Bell, User, Sun, Moon, Languages } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+import { useRestaurant } from "../hooks/useRestaurant";
+import { useTranslation } from "react-i18next";
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const Header = ({ toggleSidebar }) => {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { getRestaurantName, getThemeColors } = useRestaurant();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const themeColors = getThemeColors();
+
+  // Debug logging
+  console.log("Header - themeColors:", themeColors);
 
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'en' ? 'ar' : 'en';
+    const newLang = i18n.language === "en" ? "ar" : "en";
     i18n.changeLanguage(newLang);
   };
 
@@ -22,20 +28,45 @@ const Header = ({ toggleSidebar }) => {
         <button onClick={toggleSidebar} className="menu-toggle">
           <Menu size={22} />
         </button>
+        <div className="restaurant-brand">
+          {themeColors.logo ? (
+            <img
+              src={themeColors.logo}
+              alt="Restaurant Logo"
+              className="restaurant-logo"
+              onError={(e) => {
+                console.error("Logo failed to load:", themeColors.logo);
+                e.target.style.display = "none";
+              }}
+            />
+          ) : (
+            <span className="restaurant-name">{getRestaurantName()}</span>
+          )}
+        </div>
         <div className="search-bar">
           <Search size={18} className="search-icon" />
-          <input type="text" placeholder={t('header.search_placeholder')} />
+          <input type="text" placeholder={t("header.search_placeholder")} />
         </div>
       </div>
 
       <div className="header-right">
-        <button onClick={toggleLanguage} className="icon-btn lang-toggle" title="Switch Language">
+        <button
+          onClick={toggleLanguage}
+          className="icon-btn lang-toggle"
+          title="Switch Language"
+        >
           <Languages size={20} />
-          <span className="lang-label">{i18n.language === 'en' ? 'AR' : 'EN'}</span>
+          <span className="lang-label">
+            {i18n.language === "en" ? "AR" : "EN"}
+          </span>
         </button>
 
-        <button onClick={toggleTheme} className="icon-btn theme-toggle" title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>
-          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+        <button
+          onClick={toggleTheme}
+          className="icon-btn theme-toggle"
+          title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+        >
+          {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
         </button>
 
         <button className="icon-btn">
@@ -43,10 +74,14 @@ const Header = ({ toggleSidebar }) => {
           <span className="notification-badge"></span>
         </button>
 
-        <div className="user-profile" onClick={() => navigate('/profile')}>
+        <div className="user-profile" onClick={() => navigate("/profile")}>
           <div className="user-info">
-            <span className="user-name">{user?.name || 'Admin User'}</span>
-            <span className="user-role">{user?.role === 'Admin' ? t('header.administrator') : user?.role || t('header.administrator')}</span>
+            <span className="user-name">{user?.name || "Admin User"}</span>
+            <span className="user-role">
+              {user?.role === "Admin"
+                ? t("header.administrator")
+                : user?.role || t("header.administrator")}
+            </span>
           </div>
           <div className="avatar">
             <User size={20} />
@@ -85,6 +120,27 @@ const Header = ({ toggleSidebar }) => {
 
         [data-theme='dark'] .menu-toggle:hover {
           background: rgba(255, 255, 255, 0.05);
+        }
+
+        .restaurant-brand {
+          margin-left: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .restaurant-name {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: var(--primary);
+          letter-spacing: -0.025em;
+        }
+
+        .restaurant-logo {
+          height: 40px;
+          max-width: 120px;
+          object-fit: contain;
+          border-radius: var(--radius-sm);
         }
 
         .search-bar {

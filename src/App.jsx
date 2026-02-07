@@ -1,31 +1,208 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/Login';
-import Profile from './pages/Profile';
-import LandingPage from './pages/LandingPage';
-import PaymentResult from './pages/PaymentResult';
-import DashboardLayout from './layouts/DashboardLayout';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Login from "./pages/Login";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+import LandingPage from "./pages/LandingPage";
+import PaymentResult from "./pages/PaymentResult";
+import DashboardLayout from "./layouts/DashboardLayout";
+import {
+  simulateRestaurantLogin,
+  testThemes,
+  applyTestTheme,
+} from "./utils/demoTheme";
 
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 // Placeholder components for other pages
 const Dashboard = () => {
   const { t } = useTranslation();
   return (
     <div className="dashboard-content">
-      <h1>{t('dashboard.welcome')}</h1>
-      <p>{t('dashboard.welcome_subtitle')}</p>
-      <div className="stats-grid">
-        <div className="card"><h3>{t('dashboard.total_sales')}</h3><p>$12,450</p></div>
-        <div className="card"><h3>{t('dashboard.active_orders')}</h3><p>8</p></div>
-        <div className="card"><h3>{t('dashboard.tables_booked')}</h3><p>12/20</p></div>
-        <div className="card"><h3>{t('dashboard.staff_on_duty')}</h3><p>6</p></div>
+      <h1>{t("dashboard.welcome")}</h1>
+      <p>{t("dashboard.welcome_subtitle")}</p>
+
+      {/* Theme Demo Section */}
+      <div className="theme-demo">
+        <h2>{t("settings.theme_demo")}</h2>
+        <p>{t("settings.theme_demo_desc")}</p>
+
+        <div className="theme-controls">
+          <h3>{t("settings.test_themes")}</h3>
+          <div className="theme-buttons">
+            <button
+              onClick={() => simulateRestaurantLogin()}
+              className="demo-btn primary"
+            >
+              {t("settings.simulate_login")}
+            </button>
+            {testThemes.map((theme, index) => (
+              <button
+                key={theme.name}
+                onClick={() => applyTestTheme(index)}
+                className="demo-btn"
+                style={{ background: theme.theme.primaryColor, color: "white" }}
+              >
+                {theme.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="color-showcase">
+          <div className="color-card primary">
+            <h3>{t("settings.primary_color")}</h3>
+            <p>{t("settings.primary_color_desc")}</p>
+          </div>
+          <div className="color-card secondary">
+            <h3>{t("settings.secondary_color")}</h3>
+            <p>{t("settings.secondary_color_desc")}</p>
+          </div>
+          <div className="color-card accent">
+            <h3>{t("settings.accent_color")}</h3>
+            <p>{t("settings.accent_color_desc")}</p>
+          </div>
+        </div>
+
+        <div className="button-showcase">
+          <button className="btn-primary">Primary Button</button>
+          <button className="btn-secondary">Secondary Button</button>
+          <button className="btn-accent">Accent Button</button>
+        </div>
       </div>
+
+      <div className="stats-grid">
+        <div className="card">
+          <h3>{t("dashboard.total_sales")}</h3>
+          <p>$12,450</p>
+        </div>
+        <div className="card">
+          <h3>{t("dashboard.active_orders")}</h3>
+          <p>8</p>
+        </div>
+        <div className="card">
+          <h3>{t("dashboard.tables_booked")}</h3>
+          <p>12/20</p>
+        </div>
+        <div className="card">
+          <h3>{t("dashboard.staff_on_duty")}</h3>
+          <p>6</p>
+        </div>
+      </div>
+
       <style>{`
         .dashboard-content h1 { margin-bottom: 1rem; }
+        
+        .theme-demo {
+          margin: 2rem 0;
+          padding: 1.5rem;
+          background: var(--bg-card);
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-lg);
+        }
+        
+        .theme-demo h2 {
+          color: var(--primary);
+          margin-bottom: 0.5rem;
+        }
+        
+        .theme-controls {
+          margin: 1.5rem 0;
+          padding: 1rem;
+          background: var(--bg-base);
+          border-radius: var(--radius-md);
+          border: 1px solid var(--border-color);
+        }
+        
+        .theme-controls h3 {
+          color: var(--text-primary);
+          margin-bottom: 1rem;
+          font-size: 1rem;
+        }
+        
+        .theme-buttons {
+          display: flex;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+        
+        .demo-btn {
+          padding: 0.5rem 1rem;
+          border-radius: var(--radius-md);
+          border: none;
+          font-weight: 500;
+          cursor: pointer;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .demo-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-md);
+        }
+        
+        .demo-btn.primary {
+          background: var(--primary);
+          color: var(--primary-content);
+        }
+        
+        .color-showcase {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+          margin: 1.5rem 0;
+        }
+        
+        .color-card {
+          padding: 1rem;
+          border-radius: var(--radius-md);
+          color: white;
+          text-align: center;
+        }
+        
+        .color-card.primary { background: var(--primary); }
+        .color-card.secondary { background: var(--secondary); }
+        .color-card.accent { background: var(--accent); }
+        
+        .button-showcase {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1.5rem;
+          flex-wrap: wrap;
+        }
+        
+        .btn-primary {
+          background: var(--primary);
+          color: var(--primary-content);
+          padding: 0.75rem 1.5rem;
+          border-radius: var(--radius-md);
+          border: none;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        
+        .btn-secondary {
+          background: var(--secondary);
+          color: white;
+          padding: 0.75rem 1.5rem;
+          border-radius: var(--radius-md);
+          border: none;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        
+        .btn-accent {
+          background: var(--accent);
+          color: white;
+          padding: 0.75rem 1.5rem;
+          border-radius: var(--radius-md);
+          border: none;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        
         .stats-grid { 
           display: grid; 
           grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
@@ -61,14 +238,35 @@ function App() {
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/orders" element={<div>Orders Page (Implementation pending)</div>} />
-                <Route path="/menu" element={<div>Menu Page (Implementation pending)</div>} />
-                <Route path="/tables" element={<div>Tables Page (Implementation pending)</div>} />
-                <Route path="/staff" element={<div>Staff Page (Implementation pending)</div>} />
-                <Route path="/inventory" element={<div>Inventory Page (Implementation pending)</div>} />
-                <Route path="/invoices" element={<div>Invoices Page (Implementation pending)</div>} />
-                <Route path="/reports" element={<div>Reports Page (Implementation pending)</div>} />
-                <Route path="/settings" element={<div>Settings Page (Implementation pending)</div>} />
+                <Route
+                  path="/orders"
+                  element={<div>Orders Page (Implementation pending)</div>}
+                />
+                <Route
+                  path="/menu"
+                  element={<div>Menu Page (Implementation pending)</div>}
+                />
+                <Route
+                  path="/tables"
+                  element={<div>Tables Page (Implementation pending)</div>}
+                />
+                <Route
+                  path="/staff"
+                  element={<div>Staff Page (Implementation pending)</div>}
+                />
+                <Route
+                  path="/inventory"
+                  element={<div>Inventory Page (Implementation pending)</div>}
+                />
+                <Route
+                  path="/invoices"
+                  element={<div>Invoices Page (Implementation pending)</div>}
+                />
+                <Route
+                  path="/reports"
+                  element={<div>Reports Page (Implementation pending)</div>}
+                />
+                <Route path="/settings" element={<Settings />} />
               </Route>
             </Route>
 

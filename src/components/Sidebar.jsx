@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React from "react";
+import { NavLink } from "react-router-dom";
 import {
   BarChart3,
   Users,
@@ -12,34 +12,64 @@ import {
   Package,
   ChevronLeft,
   Settings,
-  LogOut
-} from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useTranslation } from 'react-i18next';
+  LogOut,
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useRestaurant } from "../hooks/useRestaurant";
+import { useTranslation } from "react-i18next";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const { logout, user } = useAuth();
+  const { getRestaurantName, getThemeColors } = useRestaurant();
   const { t, i18n } = useTranslation();
 
+  // Debug logging
+  console.log("Sidebar - themeColors:", getThemeColors());
+
   const menuItems = [
-    { name: t('nav.dashboard'), icon: LayoutDashboard, path: '/dashboard' },
-    { name: t('nav.orders'), icon: ShoppingCart, path: '/orders' },
-    { name: t('nav.menu'), icon: SquareMenu, path: '/menu' },
-    { name: t('nav.tables'), icon: UtensilsCrossed, path: '/tables' },
-    { name: t('nav.staff'), icon: Users, path: '/staff' },
-    { name: t('nav.inventory'), icon: Package, path: '/inventory' },
-    { name: t('nav.invoices'), icon: Receipt, path: '/invoices' },
-    { name: t('nav.reports'), icon: BarChart3, path: '/reports' },
+    { name: t("nav.dashboard"), icon: LayoutDashboard, path: "/dashboard" },
+    { name: t("nav.orders"), icon: ShoppingCart, path: "/orders" },
+    { name: t("nav.menu"), icon: SquareMenu, path: "/menu" },
+    { name: t("nav.tables"), icon: UtensilsCrossed, path: "/tables" },
+    { name: t("nav.staff"), icon: Users, path: "/staff" },
+    { name: t("nav.inventory"), icon: Package, path: "/inventory" },
+    { name: t("nav.invoices"), icon: Receipt, path: "/invoices" },
+    { name: t("nav.reports"), icon: BarChart3, path: "/reports" },
+    { name: t("nav.settings"), icon: Settings, path: "/settings" },
   ];
 
-  const isRTL = i18n.dir() === 'rtl';
+  const isRTL = i18n.dir() === "rtl";
 
   return (
-    <aside className={`sidebar ${!isOpen ? 'collapsed' : ''} ${isRTL ? 'rtl' : ''}`}>
+    <aside
+      className={`sidebar ${!isOpen ? "collapsed" : ""} ${isRTL ? "rtl" : ""}`}
+    >
       <div className="sidebar-header">
-        {isOpen && <span className="logo-text">Restaurant<span>ERP</span></span>}
+        {isOpen && (
+          <div className="logo-text">
+            {getThemeColors().logo ? (
+              <img
+                src={getThemeColors().logo}
+                alt="Restaurant Logo"
+                className="sidebar-logo"
+                onError={(e) => {
+                  console.error(
+                    "Sidebar logo failed to load:",
+                    getThemeColors().logo,
+                  );
+                  e.target.style.display = "none";
+                }}
+              />
+            ) : (
+              <>
+                <span className="restaurant-name">{getRestaurantName()}</span>
+                <span>ERP</span>
+              </>
+            )}
+          </div>
+        )}
         <button onClick={() => setIsOpen(!isOpen)} className="toggle-btn">
-          <ChevronLeft size={20} className={!isOpen ? 'rotate' : ''} />
+          <ChevronLeft size={20} className={!isOpen ? "rotate" : ""} />
         </button>
       </div>
 
@@ -48,7 +78,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           <NavLink
             key={item.name}
             to={item.path}
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
           >
             <item.icon size={22} />
             {isOpen && <span>{item.name}</span>}
@@ -59,11 +89,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       <div className="sidebar-footer">
         <NavLink to="/settings" className="nav-link">
           <Settings size={22} />
-          {isOpen && <span>{t('nav.settings')}</span>}
+          {isOpen && <span>{t("nav.settings")}</span>}
         </NavLink>
         <button onClick={logout} className="nav-link logout-btn">
           <LogOut size={22} />
-          {isOpen && <span>{t('nav.logout')}</span>}
+          {isOpen && <span>{t("nav.logout")}</span>}
         </button>
       </div>
 
@@ -99,6 +129,16 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           font-weight: 800;
           font-size: 1.25rem;
           letter-spacing: -0.5px;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .sidebar-logo {
+          height: 32px;
+          max-width: 100px;
+          object-fit: contain;
+          border-radius: var(--radius-sm);
         }
 
         .logo-text span {
