@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import Staff from "./pages/Staff";
 import Tables from "./pages/Tables";
 import Reservations from "./pages/Reservations";
+import Orders from "./pages/Orders";
 
 // Placeholder components for other pages
 const Dashboard = () => {
@@ -192,10 +193,7 @@ function App() {
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route
-                  path="/orders"
-                  element={<div>Orders Page (Implementation pending)</div>}
-                />
+                <Route path="/orders" element={<Orders />} />
                 <Route
                   path="/menu"
                   element={<div>Menu Page (Implementation pending)</div>}

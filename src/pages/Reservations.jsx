@@ -18,9 +18,12 @@ import {
   Filter,
   User,
   FileText,
+  UserPlus,
 } from "lucide-react";
 import reservationService from "../services/reservationService";
 import tableService from "../services/tableService";
+import customerService from "../services/customerService";
+import CustomerModal from "../components/CustomerModal";
 
 const Reservations = () => {
   const { t, i18n } = useTranslation();
@@ -62,6 +65,7 @@ const Reservations = () => {
   const [customerSearchResults, setCustomerSearchResults] = useState([]);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [searchingCustomers, setSearchingCustomers] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
 
   useEffect(() => {
     fetchReservations();
@@ -89,25 +93,13 @@ const Reservations = () => {
 
     try {
       setSearchingCustomers(true);
-      // This would be a customer service call - for now, simulate with existing reservations
-      const customerPhoneMatches = reservations
-        .filter((r) => r.phone && r.phone.includes(phone))
-        .map((r) => ({
-          _id: r.customer?._id || r.customer,
-          name: r.name || r.customer?.name || "Unknown",
-          phone: r.phone,
-          email: r.email || r.customer?.email || "",
-        }))
-        .filter(
-          (customer, index, self) =>
-            index === self.findIndex((c) => c.phone === customer.phone),
-        ); // Remove duplicates
-
-      setCustomerSearchResults(customerPhoneMatches);
-      setShowCustomerDropdown(customerPhoneMatches.length > 0);
+      const response = await customerService.search(phone);
+      setCustomerSearchResults(response.data || response);
+      setShowCustomerDropdown(true);
     } catch (error) {
       console.error("Error searching customers:", error);
       setCustomerSearchResults([]);
+      setShowCustomerDropdown(false);
     } finally {
       setSearchingCustomers(false);
     }
@@ -133,6 +125,52 @@ const Reservations = () => {
     setCustomerSearch("");
     setShowCustomerDropdown(false);
     setCustomerSearchResults([]);
+  };
+
+  // Create new customer from guest request
+  const createCustomerFromGuest = async () => {
+    if (!formData.name || !formData.phone) {
+      setMessage({
+        type: "error",
+        text: "Name and phone are required to create a customer",
+      });
+      return null;
+    }
+
+    try {
+      const customerData = {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email || "",
+        address: "",
+      };
+
+      const response = await customerService.create(customerData);
+      return response.data || response;
+    } catch (error) {
+      console.error("Error creating customer:", error);
+      setMessage({
+        type: "error",
+        text: error.response?.data?.message || "Failed to create customer",
+      });
+      return null;
+    }
+  };
+
+  // Handle customer creation success from modal
+  const handleCustomerCreated = (newCustomer) => {
+    setSelectedCustomer(newCustomer);
+    setCustomerSearch(newCustomer.phone);
+    setShowCustomerModal(false);
+    setMessage({
+      type: "success",
+      text: "Customer created and selected successfully!",
+    });
+  };
+
+  // Open customer modal with initial data
+  const openCustomerModal = () => {
+    setShowCustomerModal(true);
   };
 
   const fetchReservations = async () => {
@@ -187,7 +225,30 @@ const Reservations = () => {
       } else {
         // Create new reservation or guest request
         if (isGuestRequest) {
-          // Submit guest request - no duration field needed
+          // Check if customer exists, if not create one
+          let customer = selectedCustomer;
+          if (!customer && formData.phone) {
+            // Search for existing customer first
+            try {
+              const searchResults = await customerService.search(
+                formData.phone,
+              );
+              const existingCustomer = searchResults.data?.find(
+                (c) => c.phone === formData.phone,
+              );
+              if (existingCustomer) {
+                customer = existingCustomer;
+              } else {
+                // Create new customer
+                customer = await createCustomerFromGuest();
+              }
+            } catch (error) {
+              // If search fails, try to create customer directly
+              customer = await createCustomerFromGuest();
+            }
+          }
+
+          // Submit guest request with customer ID if available
           const guestRequestData = {
             name: formData.name,
             phone: formData.phone,
@@ -196,11 +257,14 @@ const Reservations = () => {
             reservedAt: formData.reservedAt,
             numberOfGuests: formData.numberOfGuests,
             notes: formData.notes, // Optional
+            customer: customer?._id, // Link to customer if created/found
           };
           await reservationService.createGuestRequest(guestRequestData);
           setMessage({
             type: "success",
-            text: "Reservation request submitted successfully!",
+            text: customer
+              ? "Customer created and reservation request submitted successfully!"
+              : "Reservation request submitted successfully!",
           });
         } else {
           // Create admin reservation
@@ -774,6 +838,25 @@ const Reservations = () => {
                           ))}
                         </div>
                       )}
+
+                      {customerSearchResults.length === 0 &&
+                        customerSearch.length >= 3 &&
+                        !searchingCustomers && (
+                          <div
+                            className="customer-option create-customer-option"
+                            onClick={openCustomerModal}
+                          >
+                            <div className="customer-info">
+                              <div className="customer-name">
+                                <UserPlus size={16} />
+                                Create New Customer
+                              </div>
+                              <div className="customer-phone">
+                                {customerSearch}
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                       {selectedCustomer && (
                         <div className="selected-customer-info">
@@ -1742,6 +1825,18 @@ const Reservations = () => {
           }
         }
       `}</style>
+
+      {/* Customer Modal */}
+      <CustomerModal
+        isOpen={showCustomerModal}
+        onClose={() => setShowCustomerModal(false)}
+        onCustomerCreated={handleCustomerCreated}
+        initialData={{
+          phone: customerSearch,
+          name: formData.name,
+          email: formData.email,
+        }}
+      />
     </div>
   );
 };

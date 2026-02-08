@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Landing page centering override */
+.landing-page-container {
+  direction: ltr !important;
+  text-align: center !important;
+}
+
+.landing-page-content {
+  margin: 0 auto !important;
+  max-width: 1280px !important;
+}
+
 :root {
   /* Color Palette - Dynamic Restaurant Theme */
   --primary: var(--restaurant-primary, #f59e0b); /* Fallback to Amber 500 */
