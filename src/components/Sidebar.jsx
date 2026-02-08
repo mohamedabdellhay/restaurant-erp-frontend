@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import {
   BarChart3,
   Users,
+  Calendar,
   LayoutDashboard,
   UtensilsCrossed,
   SquareMenu,
@@ -35,6 +36,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const menuItems = [
     { name: t("nav.dashboard"), icon: LayoutDashboard, path: "/dashboard" },
     { name: t("nav.orders"), icon: ShoppingCart, path: "/orders" },
+    { name: t("nav.reservations"), icon: Calendar, path: "/reservations" },
     { name: t("nav.menu"), icon: SquareMenu, path: "/menu" },
     { name: t("nav.tables"), icon: UtensilsCrossed, path: "/tables" },
     { name: t("nav.staff"), icon: Users, path: "/staff" },
