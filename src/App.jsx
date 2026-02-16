@@ -5,8 +5,9 @@ import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
-import LandingPage from "./pages/LandingPage";
+import Staff from "./pages/Staff";
+import Suppliers from "./pages/Suppliers";
+import Inventory from "./pages/Inventory";
 import PaymentResult from "./pages/PaymentResult";
 import DashboardLayout from "./layouts/DashboardLayout";
 import {
@@ -16,166 +17,13 @@ import {
 } from "./utils/demoTheme";
 
 import { useTranslation } from "react-i18next";
-import Staff from "./pages/Staff";
+import LandingPage from "./pages/LandingPage";
 import Tables from "./pages/Tables";
 import Reservations from "./pages/Reservations";
 import Orders from "./pages/Orders";
+import Settings from "./pages/Settings";
 
-// Placeholder components for other pages
-const Dashboard = () => {
-  const { t } = useTranslation();
-  return (
-    <div className="dashboard-content">
-      <h1>{t("dashboard.welcome")}</h1>
-      <p>{t("dashboard.welcome_subtitle")}</p>
-
-      <div className="stats-grid">
-        <div className="card">
-          <h3>{t("dashboard.total_sales")}</h3>
-          <p>$12,450</p>
-        </div>
-        <div className="card">
-          <h3>{t("dashboard.active_orders")}</h3>
-          <p>8</p>
-        </div>
-        <div className="card">
-          <h3>{t("dashboard.tables_booked")}</h3>
-          <p>12/20</p>
-        </div>
-        <div className="card">
-          <h3>{t("dashboard.staff_on_duty")}</h3>
-          <p>6</p>
-        </div>
-      </div>
-
-      <style>{`
-        .dashboard-content h1 { margin-bottom: 1rem; }
-        
-        .theme-demo {
-          margin: 2rem 0;
-          padding: 1.5rem;
-          background: var(--bg-card);
-          border: 1px solid var(--border-color);
-          border-radius: var(--radius-lg);
-        }
-        
-        .theme-demo h2 {
-          color: var(--primary);
-          margin-bottom: 0.5rem;
-        }
-        
-        .theme-controls {
-          margin: 1.5rem 0;
-          padding: 1rem;
-          background: var(--bg-base);
-          border-radius: var(--radius-md);
-          border: 1px solid var(--border-color);
-        }
-        
-        .theme-controls h3 {
-          color: var(--text-primary);
-          margin-bottom: 1rem;
-          font-size: 1rem;
-        }
-        
-        .theme-buttons {
-          display: flex;
-          gap: 0.75rem;
-          flex-wrap: wrap;
-        }
-        
-        .demo-btn {
-          padding: 0.5rem 1rem;
-          border-radius: var(--radius-md);
-          border: none;
-          font-weight: 500;
-          cursor: pointer;
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .demo-btn:hover {
-          transform: translateY(-1px);
-          box-shadow: var(--shadow-md);
-        }
-        
-        .demo-btn.primary {
-          background: var(--primary);
-          color: var(--primary-content);
-        }
-        
-        .color-showcase {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1rem;
-          margin: 1.5rem 0;
-        }
-        
-        .color-card {
-          padding: 1rem;
-          border-radius: var(--radius-md);
-          color: white;
-          text-align: center;
-        }
-        
-        .color-card.primary { background: var(--primary); }
-        .color-card.secondary { background: var(--secondary); }
-        .color-card.accent { background: var(--accent); }
-        
-        .button-showcase {
-          display: flex;
-          gap: 1rem;
-          margin-top: 1.5rem;
-          flex-wrap: wrap;
-        }
-        
-        .btn-primary {
-          background: var(--primary);
-          color: var(--primary-content);
-          padding: 0.75rem 1.5rem;
-          border-radius: var(--radius-md);
-          border: none;
-          font-weight: 600;
-          cursor: pointer;
-        }
-        
-        .btn-secondary {
-          background: var(--secondary);
-          color: white;
-          padding: 0.75rem 1.5rem;
-          border-radius: var(--radius-md);
-          border: none;
-          font-weight: 600;
-          cursor: pointer;
-        }
-        
-        .btn-accent {
-          background: var(--accent);
-          color: white;
-          padding: 0.75rem 1.5rem;
-          border-radius: var(--radius-md);
-          border: none;
-          font-weight: 600;
-          cursor: pointer;
-        }
-        
-        .stats-grid { 
-          display: grid; 
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
-          gap: 1.5rem; 
-          margin-top: 2rem; 
-        }
-        .stats-grid .card h3 { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
-        .stats-grid .card p { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
-        
-        [dir='rtl'] .dashboard-content h1,
-        [dir='rtl'] .dashboard-content p,
-        [dir='rtl'] .stats-grid .card {
-          text-align: right;
-        }
-      `}</style>
-    </div>
-  );
-};
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -201,10 +49,8 @@ function App() {
                 <Route path="/tables" element={<Tables />} />
                 <Route path="/reservations" element={<Reservations />} />
                 <Route path="/staff" element={<Staff />} />
-                <Route
-                  path="/inventory"
-                  element={<div>Inventory Page (Implementation pending)</div>}
-                />
+                <Route path="/suppliers" element={<Suppliers />} />
+                <Route path="/inventory" element={<Inventory />} />
                 <Route
                   path="/invoices"
                   element={<div>Invoices Page (Implementation pending)</div>}

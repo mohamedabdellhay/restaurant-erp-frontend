@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   Receipt,
   Package,
+  Truck,
   ChevronLeft,
   Settings,
   LogOut,
@@ -20,15 +21,15 @@ import { useRestaurant } from "../hooks/useRestaurant";
 import { useTranslation } from "react-i18next";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const { getRestaurantName, getThemeColors } = useRestaurant();
   const { t, i18n } = useTranslation();
 
   // Get theme colors for dynamic styling
   const themeColors = getThemeColors();
   const primaryColor = themeColors.primary || "#f59e0b";
-  const secondaryColor = themeColors.secondary || "#6366f1";
-  const accentColor = themeColors.accent || "#10b981";
+  //   const secondaryColor = themeColors.secondary || "#6366f1";
+  //   const accentColor = themeColors.accent || "#10b981";
 
   // Debug logging
   console.log("Sidebar - themeColors:", themeColors);
@@ -41,6 +42,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { name: t("nav.tables"), icon: UtensilsCrossed, path: "/tables" },
     { name: t("nav.staff"), icon: Users, path: "/staff" },
     { name: t("nav.inventory"), icon: Package, path: "/inventory" },
+    { name: t("nav.suppliers"), icon: Truck, path: "/suppliers" },
     { name: t("nav.invoices"), icon: Receipt, path: "/invoices" },
     { name: t("nav.reports"), icon: BarChart3, path: "/reports" },
     { name: t("nav.settings"), icon: Settings, path: "/settings" },
