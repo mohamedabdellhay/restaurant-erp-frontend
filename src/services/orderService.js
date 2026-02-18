@@ -110,6 +110,18 @@ const orderService = {
       throw error;
     }
   },
+
+  // Search orders by customer name or phone
+  search: async (query) => {
+    try {
+      const response = await api.get(
+        `/orders/search?q=${encodeURIComponent(query)}`,
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default orderService;

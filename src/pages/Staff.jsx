@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useRestaurant } from "../hooks/useRestaurant";
+import { useAuth } from "../context/AuthContext";
+import { RoleBasedUI } from "../utils/roleUtils";
 import {
   Users,
   Plus,
@@ -23,12 +25,12 @@ import staffService from "../services/staffService";
 const Staff = () => {
   const { t, i18n } = useTranslation();
   const { getThemeColors } = useRestaurant();
+  const { user } = useAuth();
 
   // Get theme colors for dynamic styling
   const themeColors = getThemeColors();
   const primaryColor = themeColors.primary || "#f59e0b";
   const secondaryColor = themeColors.secondary || "#6366f1";
-  const accentColor = themeColors.accent || "#10b981";
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -181,8 +183,10 @@ const Staff = () => {
           }}
           className="btn-primary"
         >
-          <Plus size={20} />
-          {t("staff.add_new")}
+          <RoleBasedUI user={user} allowedRoles={["admin"]}>
+            <Plus size={20} />
+            {t("staff.add_new")}
+          </RoleBasedUI>
         </button>
       </div>
 
@@ -321,31 +325,42 @@ const Staff = () => {
                     </td>
                     <td>
                       <div className="action-buttons">
-                        <button
-                          onClick={() => handleEdit(member)}
-                          className="btn-icon btn-edit"
-                          title={t("common.edit")}
+                        <RoleBasedUI
+                          user={user}
+                          allowedRoles={["admin", "manager"]}
                         >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleToggleStatus(member._id)}
-                          className="btn-icon btn-toggle"
-                          title={t("staff.toggle_status")}
-                        >
-                          {member.isActive ? (
-                            <ToggleLeft size={16} />
-                          ) : (
-                            <ToggleRight size={16} />
-                          )}
-                        </button>
-                        <button
-                          onClick={() => handleDelete(member._id)}
-                          className="btn-icon btn-delete"
-                          title={t("common.delete")}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                          <button
+                            onClick={() => handleEdit(member)}
+                            className="btn-icon btn-edit"
+                            title={t("common.edit")}
+                          >
+                            <Edit size={16} />
+                          </button>
+                        </RoleBasedUI>
+
+                        <RoleBasedUI user={user} allowedRoles={["admin"]}>
+                          <button
+                            onClick={() => handleToggleStatus(member._id)}
+                            className="btn-icon btn-toggle"
+                            title={t("staff.toggle_status")}
+                          >
+                            {member.isActive ? (
+                              <ToggleLeft size={16} />
+                            ) : (
+                              <ToggleRight size={16} />
+                            )}
+                          </button>
+                        </RoleBasedUI>
+
+                        <RoleBasedUI user={user} allowedRoles={["admin"]}>
+                          <button
+                            onClick={() => handleDelete(member._id)}
+                            className="btn-icon btn-delete"
+                            title={t("common.delete")}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </RoleBasedUI>
                       </div>
                     </td>
                   </tr>

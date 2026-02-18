@@ -21,7 +21,7 @@ import { useRestaurant } from "../hooks/useRestaurant";
 import { useTranslation } from "react-i18next";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const { getRestaurantName, getThemeColors } = useRestaurant();
   const { t, i18n } = useTranslation();
 
@@ -34,19 +34,81 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   // Debug logging
   console.log("Sidebar - themeColors:", themeColors);
 
-  const menuItems = [
-    { name: t("nav.dashboard"), icon: LayoutDashboard, path: "/dashboard" },
-    { name: t("nav.orders"), icon: ShoppingCart, path: "/orders" },
-    { name: t("nav.reservations"), icon: Calendar, path: "/reservations" },
-    { name: t("nav.menu"), icon: SquareMenu, path: "/menu" },
-    { name: t("nav.tables"), icon: UtensilsCrossed, path: "/tables" },
-    { name: t("nav.staff"), icon: Users, path: "/staff" },
-    { name: t("nav.inventory"), icon: Package, path: "/inventory" },
-    { name: t("nav.suppliers"), icon: Truck, path: "/suppliers" },
-    { name: t("nav.invoices"), icon: Receipt, path: "/invoices" },
-    { name: t("nav.reports"), icon: BarChart3, path: "/reports" },
-    { name: t("nav.settings"), icon: Settings, path: "/settings" },
+  // Define all possible menu items with their required roles
+  const allMenuItems = [
+    {
+      name: t("nav.dashboard"),
+      icon: LayoutDashboard,
+      path: "/dashboard",
+      requiredRoles: ["admin", "manager"],
+    },
+    {
+      name: t("nav.orders"),
+      icon: ShoppingCart,
+      path: "/orders",
+      requiredRoles: ["admin", "manager", "cashier", "waiter", "chef"], // Any logged-in staff
+    },
+    {
+      name: t("nav.reservations"),
+      icon: Calendar,
+      path: "/reservations",
+      requiredRoles: ["admin", "manager"],
+    },
+    {
+      name: t("nav.menu"),
+      icon: SquareMenu,
+      path: "/menu",
+      requiredRoles: ["cashier", "waiter", "admin", "manager", "chef"],
+    },
+    {
+      name: t("nav.tables"),
+      icon: UtensilsCrossed,
+      path: "/tables",
+      requiredRoles: ["cashier", "waiter", "admin", "manager"],
+    },
+    {
+      name: t("nav.staff"),
+      icon: Users,
+      path: "/staff",
+      requiredRoles: ["admin", "manager"],
+    },
+    {
+      name: t("nav.inventory"),
+      icon: Package,
+      path: "/inventory",
+      requiredRoles: ["admin", "manager", "cashier", "waiter", "chef"], // Any logged-in staff
+    },
+    {
+      name: t("nav.suppliers"),
+      icon: Truck,
+      path: "/suppliers",
+      requiredRoles: ["admin", "manager", "cashier", "waiter", "chef"], // Any logged-in staff
+    },
+    {
+      name: t("nav.invoices"),
+      icon: Receipt,
+      path: "/invoices",
+      requiredRoles: ["admin", "manager", "cashier", "waiter", "chef"], // Any logged-in staff
+    },
+    {
+      name: t("nav.reports"),
+      icon: BarChart3,
+      path: "/reports",
+      requiredRoles: ["admin", "manager"],
+    },
+    {
+      name: t("nav.settings"),
+      icon: Settings,
+      path: "/settings",
+      requiredRoles: ["admin"],
+    },
   ];
+
+  // Filter menu items based on user role
+  const menuItems = allMenuItems.filter((item) => {
+    if (!user) return false;
+    return item.requiredRoles.includes(user.role);
+  });
 
   const isRTL = i18n.dir() === "rtl";
 

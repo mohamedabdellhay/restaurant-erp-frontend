@@ -19,12 +19,14 @@ import orderService from "../services/orderService";
 import invoiceService from "../services/invoiceService";
 import tableService from "../services/tableService";
 import customerService from "../services/customerService";
+import menuService from "../services/menuService";
 import CustomerModal from "../components/CustomerModal";
 
 const Orders = () => {
   const { t, i18n } = useTranslation();
   const [orders, setOrders] = useState([]);
   const [tables, setTables] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -61,6 +63,7 @@ const Orders = () => {
   useEffect(() => {
     fetchOrders();
     fetchTables();
+    fetchMenuItems();
   }, []);
 
   // Auto-hide message after 3 seconds
@@ -95,6 +98,15 @@ const Orders = () => {
       setTables(response.data || response);
     } catch (error) {
       console.error("Failed to fetch tables:", error);
+    }
+  };
+
+  const fetchMenuItems = async () => {
+    try {
+      const response = await menuService.getAll();
+      setMenuItems(response.data || response || []);
+    } catch (error) {
+      console.error("Failed to fetch menu items:", error);
     }
   };
 
@@ -159,6 +171,46 @@ const Orders = () => {
       type: "success",
       text: "Customer created and selected successfully!",
     });
+  };
+
+  // Order items management
+  const addOrderItem = (menuItem) => {
+    const newItem = {
+      menuItem: menuItem._id,
+      name: menuItem.name,
+      price: menuItem.price,
+      quantity: 1,
+      modifiers: [],
+      notes: "",
+    };
+    setFormData({
+      ...formData,
+      items: [...formData.items, newItem],
+    });
+  };
+
+  const removeOrderItem = (index) => {
+    const newItems = formData.items.filter((_, i) => i !== index);
+    setFormData({ ...formData, items: newItems });
+  };
+
+  const updateOrderItem = (index, field, value) => {
+    const newItems = formData.items.map((item, i) =>
+      i === index ? { ...item, [field]: value } : item,
+    );
+    setFormData({ ...formData, items: newItems });
+  };
+
+  const calculateOrderTotal = () => {
+    return formData.items.reduce((total, item) => {
+      const itemTotal = item.price * item.quantity;
+      const modifiersTotal =
+        item.modifiers?.reduce(
+          (modTotal, mod) => modTotal + (mod.price || 0),
+          0,
+        ) || 0;
+      return total + itemTotal + modifiersTotal * item.quantity;
+    }, 0);
   };
 
   const handleSubmit = async (e) => {
@@ -743,6 +795,95 @@ const Orders = () => {
                       </div>
                     )}
                   </div>
+                </div>
+
+                {/* Order Items Section */}
+                <div className="form-group full-width order-items-section">
+                  <label>{t("nav.orders_items")}</label>
+
+                  {/* Menu Items Selection */}
+                  <div className="menu-items-selection">
+                    <select
+                      onChange={(e) => {
+                        const selectedItem = menuItems.find(
+                          (item) => item._id === e.target.value,
+                        );
+                        if (selectedItem) {
+                          addOrderItem(selectedItem);
+                          e.target.value = ""; // Reset selection
+                        }
+                      }}
+                      value=""
+                    >
+                      <option value="">{t("nav.orders_select_item")}</option>
+                      {menuItems
+                        .filter((item) => item.isActive !== false)
+                        .map((item) => (
+                          <option key={item._id} value={item._id}>
+                            {item.name} - ${item.price?.toFixed(2)}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  {/* Selected Items List */}
+                  {formData.items.length > 0 && (
+                    <div className="selected-items-list">
+                      {formData.items.map((item, index) => (
+                        <div key={index} className="order-item-row">
+                          <div className="item-info">
+                            <span className="item-name">{item.name}</span>
+                            <span className="item-price">
+                              ${item.price?.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="item-controls">
+                            <input
+                              type="number"
+                              min="1"
+                              value={item.quantity}
+                              onChange={(e) =>
+                                updateOrderItem(
+                                  index,
+                                  "quantity",
+                                  parseInt(e.target.value) || 1,
+                                )
+                              }
+                              className="quantity-input"
+                            />
+                            <input
+                              type="text"
+                              placeholder={t("nav.orders_item_notes")}
+                              value={item.notes || ""}
+                              onChange={(e) =>
+                                updateOrderItem(index, "notes", e.target.value)
+                              }
+                              className="item-notes-input"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeOrderItem(index)}
+                              className="btn-icon btn-delete"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Order Total */}
+                      <div className="order-total">
+                        <strong>{t("nav.orders_total")}:</strong>
+                        <span>${calculateOrderTotal().toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.items.length === 0 && (
+                    <p className="no-items-message">
+                      {t("nav.orders_no_items")}
+                    </p>
+                  )}
                 </div>
 
                 <div className="form-group full-width">
@@ -1431,6 +1572,93 @@ const Orders = () => {
         .message.info {
           background: var(--primary);
           color: white;
+        }
+
+        /* Order Items Styles */
+        .order-items-section {
+          margin: 1rem 0;
+        }
+
+        .menu-items-selection {
+          margin-bottom: 1rem;
+        }
+
+        .menu-items-selection select {
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-md);
+          background: var(--bg-base);
+          color: var(--text-primary);
+        }
+
+        .selected-items-list {
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-md);
+          padding: 1rem;
+          background: var(--bg-base);
+        }
+
+        .order-item-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.75rem;
+          border-bottom: 1px solid var(--border-color);
+          gap: 1rem;
+        }
+
+        .order-item-row:last-child {
+          border-bottom: none;
+        }
+
+        .item-info {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+
+        .item-name {
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .item-price {
+          color: var(--text-secondary);
+          font-size: 0.875rem;
+        }
+
+        .item-controls {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .quantity-input {
+          width: 60px !important;
+          text-align: center;
+        }
+
+        .item-notes-input {
+          width: 150px !important;
+        }
+
+        .order-total {
+          display: flex;
+          justify-content: space-between;
+          padding-top: 1rem;
+          margin-top: 1rem;
+          border-top: 2px solid var(--border-color);
+          font-size: 1.125rem;
+          font-weight: 700;
+          color: var(--text-primary);
+        }
+
+        .no-items-message {
+          color: var(--text-secondary);
+          font-style: italic;
+          text-align: center;
+          padding: 1rem;
         }
 
         [data-direction="rtl"] .search-box input {

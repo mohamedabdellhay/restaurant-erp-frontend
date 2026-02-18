@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useRestaurant } from "../hooks/useRestaurant";
+import { useAuth } from "../context/AuthContext";
+import { RoleBasedUI } from "../utils/roleUtils";
 import {
   Calendar,
   Plus,
@@ -28,12 +30,11 @@ import CustomerModal from "../components/CustomerModal";
 const Reservations = () => {
   const { t, i18n } = useTranslation();
   const { getThemeColors } = useRestaurant();
+  const { user } = useAuth();
 
   // Get theme colors for dynamic styling
   const themeColors = getThemeColors();
   const primaryColor = themeColors.primary || "#f59e0b";
-  const secondaryColor = themeColors.secondary || "#6366f1";
-  const accentColor = themeColors.accent || "#10b981";
 
   const [reservations, setReservations] = useState([]);
   const [tables, setTables] = useState([]);
@@ -433,9 +434,9 @@ const Reservations = () => {
         <div className="header-content">
           <h1>
             <Calendar size={28} />
-            {t("nav.reservations")}
+            {t("reservations.reservations")}
           </h1>
-          <p>{t("nav.reservations_manage_description")}</p>
+          <p>{t("reservations.manage_description")}</p>
         </div>
         <button
           onClick={() => {
@@ -444,8 +445,10 @@ const Reservations = () => {
           }}
           className="btn-primary"
         >
-          <Plus size={20} />
-          {t("nav.reservations_add_new")}
+          <RoleBasedUI user={user} allowedRoles={["admin", "manager"]}>
+            <Plus size={20} />
+            {t("reservations.add_new")}
+          </RoleBasedUI>
         </button>
       </div>
 
@@ -457,7 +460,7 @@ const Reservations = () => {
           </div>
           <div className="stat-content">
             <h3>{reservations.length}</h3>
-            <p>{t("nav.reservations_total_reservations")}</p>
+            <p>{t("reservations.total_reservations")}</p>
           </div>
         </div>
         <div className="stat-card pending">
@@ -466,7 +469,7 @@ const Reservations = () => {
           </div>
           <div className="stat-content">
             <h3>{pendingReservationsCount}</h3>
-            <p>{t("nav.reservations_pending_reservations")}</p>
+            <p>{t("reservations.pending_reservations")}</p>
           </div>
         </div>
         <div className="stat-card confirmed">
@@ -475,7 +478,7 @@ const Reservations = () => {
           </div>
           <div className="stat-content">
             <h3>{confirmedReservationsCount}</h3>
-            <p>{t("nav.reservations_confirmed_reservations")}</p>
+            <p>{t("reservations.confirmed_reservations")}</p>
           </div>
         </div>
         <div className="stat-card cancelled">
@@ -484,7 +487,7 @@ const Reservations = () => {
           </div>
           <div className="stat-content">
             <h3>{cancelledReservationsCount}</h3>
-            <p>{t("nav.reservations_cancelled_reservations")}</p>
+            <p>{t("reservations.cancelled_reservations")}</p>
           </div>
         </div>
       </div>
@@ -495,7 +498,7 @@ const Reservations = () => {
           <Search size={20} />
           <input
             type="text"
-            placeholder={t("nav.reservations_search_placeholder")}
+            placeholder={t("reservations.search_placeholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -505,31 +508,31 @@ const Reservations = () => {
             className={`filter-btn ${filterStatus === "all" ? "active" : ""}`}
             onClick={() => setFilterStatus("all")}
           >
-            {t("nav.reservations_filter_all")}
+            {t("reservations.filter_all")}
           </button>
           <button
             className={`filter-btn ${filterStatus === "pending" ? "active" : ""}`}
             onClick={() => setFilterStatus("pending")}
           >
-            {t("nav.reservations_filter_pending")}
+            {t("reservations.filter_pending")}
           </button>
           <button
             className={`filter-btn ${filterStatus === "confirmed" ? "active" : ""}`}
             onClick={() => setFilterStatus("confirmed")}
           >
-            {t("nav.reservations_filter_confirmed")}
+            {t("reservations.filter_confirmed")}
           </button>
           <button
             className={`filter-btn ${filterStatus === "cancelled" ? "active" : ""}`}
             onClick={() => setFilterStatus("cancelled")}
           >
-            {t("nav.reservations_filter_cancelled")}
+            {t("reservations.filter_cancelled")}
           </button>
           <button
             className={`filter-btn ${filterStatus === "completed" ? "active" : ""}`}
             onClick={() => setFilterStatus("completed")}
           >
-            {t("nav.reservations_filter_completed")}
+            {t("reservations.filter_completed")}
           </button>
         </div>
       </div>
@@ -551,36 +554,36 @@ const Reservations = () => {
             {filteredReservations.length === 0 ? (
               <div className="no-data">
                 <Calendar size={48} />
-                <h3>{t("nav.reservations_no_reservations_found")}</h3>
-                <p>{t("nav.reservations_no_reservations_description")}</p>
+                <h3>{t("reservations.no_found")}</h3>
+                <p>{t("reservations.no_description")}</p>
               </div>
             ) : (
               <table className="reservations-table">
                 <thead>
                   <tr>
                     <th data-direction={i18n.dir()}>
-                      {t("nav.reservations_customer")}
+                      {t("reservations.customer")}
                     </th>
                     <th data-direction={i18n.dir()}>
-                      {t("nav.reservations_table")}
+                      {t("reservations.table")}
                     </th>
                     <th data-direction={i18n.dir()}>
-                      {t("nav.reservations_date_time")}
+                      {t("reservations.date_time")}
                     </th>
                     <th data-direction={i18n.dir()}>
-                      {t("nav.reservations_guests")}
+                      {t("reservations.guests")}
                     </th>
                     <th data-direction={i18n.dir()}>
-                      {t("nav.reservations_duration")}
+                      {t("reservations.duration")}
                     </th>
                     <th data-direction={i18n.dir()}>
-                      {t("nav.reservations_status")}
+                      {t("reservations.status")}
                     </th>
                     <th data-direction={i18n.dir()}>
-                      {t("nav.reservations_notes")}
+                      {t("reservations.notes")}
                     </th>
                     <th data-direction={i18n.dir()}>
-                      {t("nav.reservations_actions")}
+                      {t("reservations.actions")}
                     </th>
                   </tr>
                 </thead>
@@ -629,7 +632,7 @@ const Reservations = () => {
                           style={{ color: getStatusColor(reservation.status) }}
                         >
                           {getStatusIcon(reservation.status)}
-                          {t(`nav.reservations_status_${reservation.status}`)}
+                          {t(`reservations.status_${reservation.status}`)}
                         </span>
                       </td>
                       <td data-direction={i18n.dir()}>
@@ -680,14 +683,14 @@ const Reservations = () => {
                 {showEditModal ? (
                   <>
                     <Edit size={20} />
-                    {t("nav.reservations_edit_reservation")}
+                    {t("reservations.edit_reservation")}
                   </>
                 ) : (
                   <>
                     <Plus size={20} />
                     {isGuestRequest
-                      ? t("nav.reservations_guest_request")
-                      : t("nav.reservations_add_new_reservation")}
+                      ? t("reservations.guest_request")
+                      : t("reservations.add_new_reservation")}
                   </>
                 )}
               </h2>
@@ -699,14 +702,14 @@ const Reservations = () => {
                       className={`toggle-btn ${!isGuestRequest ? "active" : ""}`}
                       onClick={() => setIsGuestRequest(false)}
                     >
-                      {t("nav.reservations_admin_reservation")}
+                      {t("reservations.admin_reservation")}
                     </button>
                     <button
                       type="button"
                       className={`toggle-btn ${isGuestRequest ? "active" : ""}`}
                       onClick={() => setIsGuestRequest(true)}
                     >
-                      {t("nav.reservations_guest_request")}
+                      {t("reservations.guest_request")}
                     </button>
                   </div>
                 )}
@@ -729,7 +732,7 @@ const Reservations = () => {
                   // Guest Request Fields (Public Access)
                   <>
                     <div className="form-group">
-                      <label>{t("nav.reservations_guest_name")} *</label>
+                      <label>{t("reservations.guest_name")} *</label>
                       <input
                         type="text"
                         value={formData.name}
@@ -737,14 +740,12 @@ const Reservations = () => {
                           setFormData({ ...formData, name: e.target.value })
                         }
                         required
-                        placeholder={t(
-                          "nav.reservations_guest_name_placeholder",
-                        )}
+                        placeholder={t("reservations.guest_name_placeholder")}
                       />
                     </div>
 
                     <div className="form-group">
-                      <label>{t("nav.reservations_guest_phone")} *</label>
+                      <label>{t("reservations.guest_phone")} *</label>
                       <input
                         type="tel"
                         value={formData.phone}
@@ -752,36 +753,32 @@ const Reservations = () => {
                           setFormData({ ...formData, phone: e.target.value })
                         }
                         required
-                        placeholder={t(
-                          "nav.reservations_guest_phone_placeholder",
-                        )}
+                        placeholder={t("reservations.guest_phone_placeholder")}
                       />
                       <small className="form-help">
-                        {t("nav.reservations_phone_help")}
+                        {t("reservations.phone_help")}
                       </small>
                     </div>
 
                     <div className="form-group">
-                      <label>{t("nav.reservations_guest_email")}</label>
+                      <label>{t("reservations.guest_email")}</label>
                       <input
                         type="email"
                         value={formData.email}
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
-                        placeholder={t(
-                          "nav.reservations_guest_email_placeholder",
-                        )}
+                        placeholder={t("reservations.guest_email_placeholder")}
                       />
                       <small className="form-help">
-                        {t("nav.reservations_email_help")}
+                        {t("reservations.email_help")}
                       </small>
                     </div>
                   </>
                 ) : (
                   // Admin Reservation Fields (Protected)
                   <div className="form-group">
-                    <label>{t("nav.reservations_customer_phone")} *</label>
+                    <label>{t("reservations.customer_phone")} *</label>
                     <div className="customer-search-container">
                       <div className="search-input-wrapper">
                         <input
@@ -790,7 +787,7 @@ const Reservations = () => {
                           onChange={(e) => handleCustomerSearch(e.target.value)}
                           required
                           placeholder={t(
-                            "nav.reservations_customer_phone_placeholder",
+                            "reservations.customer_phone_placeholder",
                           )}
                           className={
                             selectedCustomer ? "customer-selected" : ""
@@ -801,7 +798,7 @@ const Reservations = () => {
                             type="button"
                             onClick={clearCustomerSelection}
                             className="clear-customer-btn"
-                            title={t("nav.reservations_clear_customer")}
+                            title={t("reservations.clear_customer")}
                           >
                             <X size={16} />
                           </button>
@@ -871,14 +868,14 @@ const Reservations = () => {
                       )}
 
                       <small className="form-help">
-                        {t("nav.reservations_customer_phone_help")}
+                        {t("reservations.customer_phone_help")}
                       </small>
                     </div>
                   </div>
                 )}
 
                 <div className="form-group">
-                  <label>{t("nav.reservations_table")}</label>
+                  <label>{t("reservations.table")}</label>
                   <select
                     value={formData.table}
                     onChange={(e) =>
@@ -887,8 +884,8 @@ const Reservations = () => {
                   >
                     <option value="">
                       {isGuestRequest
-                        ? t("nav.reservations_table_optional")
-                        : t("nav.reservations_select_table")}
+                        ? t("reservations.table_optional")
+                        : t("reservations.select_table")}
                     </option>
                     {tables.map((table) => (
                       <option key={table._id} value={table._id}>
@@ -898,13 +895,13 @@ const Reservations = () => {
                   </select>
                   <small className="form-help">
                     {isGuestRequest
-                      ? t("nav.reservations_table_help_guest")
-                      : t("nav.reservations_table_help_admin")}
+                      ? t("reservations.table_help_guest")
+                      : t("reservations.table_help_admin")}
                   </small>
                 </div>
 
                 <div className="form-group">
-                  <label>{t("nav.reservations_date_time")} *</label>
+                  <label>{t("reservations.date_time")} *</label>
                   <input
                     type="datetime-local"
                     value={formData.reservedAt}
@@ -915,12 +912,12 @@ const Reservations = () => {
                     min={new Date().toISOString().slice(0, 16)} // Prevent past dates
                   />
                   <small className="form-help">
-                    {t("nav.reservations_datetime_help")}
+                    {t("reservations.datetime_help")}
                   </small>
                 </div>
 
                 <div className="form-group">
-                  <label>{t("nav.reservations_guests")} *</label>
+                  <label>{t("reservations.guests")} *</label>
                   <input
                     type="number"
                     value={formData.numberOfGuests}
@@ -935,13 +932,13 @@ const Reservations = () => {
                     max="20"
                   />
                   <small className="form-help">
-                    {t("nav.reservations_guests_help")}
+                    {t("reservations.guests_help")}
                   </small>
                 </div>
 
                 {selectedReservation && (
                   <div className="form-group">
-                    <label>{t("nav.reservations_status")}</label>
+                    <label>{t("reservations.status")}</label>
                     <select
                       value={formData.status}
                       onChange={(e) =>
@@ -949,33 +946,33 @@ const Reservations = () => {
                       }
                     >
                       <option value="pending">
-                        {t("nav.reservations_status_pending")}
+                        {t("reservations.status_pending")}
                       </option>
                       <option value="confirmed">
-                        {t("nav.reservations_status_confirmed")}
+                        {t("reservations.status_confirmed")}
                       </option>
                       <option value="cancelled">
-                        {t("nav.reservations_status_cancelled")}
+                        {t("reservations.status_cancelled")}
                       </option>
                       <option value="completed">
-                        {t("nav.reservations_status_completed")}
+                        {t("reservations.status_completed")}
                       </option>
                     </select>
                   </div>
                 )}
 
                 <div className="form-group full-width">
-                  <label>{t("nav.reservations_notes")}</label>
+                  <label>{t("reservations.notes")}</label>
                   <textarea
                     value={formData.notes}
                     onChange={(e) =>
                       setFormData({ ...formData, notes: e.target.value })
                     }
-                    placeholder={t("nav.reservations_notes_placeholder")}
+                    placeholder={t("reservations.notes_placeholder")}
                     rows={3}
                   />
                   <small className="form-help">
-                    {t("nav.reservations_notes_help")}
+                    {t("reservations.notes_help")}
                   </small>
                 </div>
               </div>

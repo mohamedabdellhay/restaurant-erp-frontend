@@ -10,6 +10,8 @@ import {
   TrendingUp,
   Activity,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { RoleBasedUI } from "../utils/roleUtils";
 import DashboardOverview from "../components/dashboard/DashboardOverview";
 import RevenueAnalytics from "../components/dashboard/RevenueAnalytics";
 import TopSellingItems from "../components/dashboard/TopSellingItems";
@@ -20,42 +22,60 @@ import InventoryAlerts from "../components/dashboard/InventoryAlerts";
 
 const Dashboard = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [dateRange, setDateRange] = useState({});
 
-  const tabs = [
+  const allTabs = [
     {
       id: "overview",
       label: t("dashboard.overview"),
       icon: <BarChart3 size={18} />,
+      requiredRoles: ["admin", "manager"],
     },
     {
       id: "realtime",
       label: t("dashboard.real_time"),
       icon: <Activity size={18} />,
+      requiredRoles: ["admin", "manager"],
     },
     {
       id: "revenue",
       label: t("dashboard.revenue"),
       icon: <TrendingUp size={18} />,
+      requiredRoles: ["admin", "manager"],
     },
     {
       id: "items",
       label: t("dashboard.top_items"),
       icon: <Package size={18} />,
+      requiredRoles: ["admin", "manager"],
     },
-    { id: "staff", label: t("dashboard.staff"), icon: <ChefHat size={18} /> },
+    {
+      id: "staff",
+      label: t("dashboard.staff"),
+      icon: <ChefHat size={18} />,
+      requiredRoles: ["admin", "manager"],
+    },
     {
       id: "customers",
       label: t("dashboard.customers"),
       icon: <Users size={18} />,
+      requiredRoles: ["admin", "manager"],
     },
     {
       id: "inventory",
-      label: t("dashboard.inventory"),
-      icon: <Settings size={18} />,
+      label: t("dashboard.inventory_alerts"),
+      icon: <Package size={18} />,
+      requiredRoles: ["admin", "manager"],
     },
   ];
+
+  // Filter tabs based on user role
+  const tabs = allTabs.filter((tab) => {
+    if (!user) return false;
+    return tab.requiredRoles.includes(user.role);
+  });
 
   const handleDateRangeChange = (range) => {
     setDateRange(range);
