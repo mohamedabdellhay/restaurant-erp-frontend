@@ -20,7 +20,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Response interceptor to handle token expiration
+// Response interceptor to handle token expiration and 401 responses
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -53,11 +53,33 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         // If refresh fails, clear auth and redirect to login
-        // localStorage.removeItem("token");
-        // localStorage.removeItem("user");
-        // window.location.href = "/login";
+        console.error("Token refresh failed, logging out user");
+
+        // Clear all auth-related data
+        localStorage.removeItem("token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("restaurantSettings");
+
+        // Redirect to login page
+        window.location.href = "/login";
+
         return Promise.reject(refreshError);
       }
+    }
+
+    // Handle other 401 cases (like refresh token endpoint itself failing)
+    if (error.response?.status === 401) {
+      console.error("401 Unauthorized, logging out user");
+
+      // Clear all auth-related data
+      localStorage.removeItem("token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("restaurantSettings");
+
+      // Redirect to login page
+      window.location.href = "/login";
     }
 
     return Promise.reject(error);

@@ -1,6 +1,6 @@
 import React from "react";
-import { useAuth } from "../../context/AuthContext";
-import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../hooks/useAuth";
+import { useTheme } from "../../hooks/useTheme";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Moon, Sun, Globe } from "lucide-react";

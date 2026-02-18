@@ -1,26 +1,26 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
-import { ThemeProvider } from "./context/ThemeContext";
-import ProtectedRoute from "./components/ProtectedRoute";
-import RoleProtectedRoute from "./components/RoleProtectedRoute";
-import DynamicFavicon from "./components/DynamicFavicon";
-import Login from "./pages/Login";
-import Profile from "./pages/Profile";
-import Staff from "./pages/Staff";
-import Suppliers from "./pages/Suppliers";
-import Inventory from "./pages/Inventory";
-import PaymentResult from "./pages/PaymentResult";
-import DashboardLayout from "./layouts/DashboardLayout";
-import LandingPage from "./pages/LandingPage";
-import Tables from "./pages/Tables";
-import Reservations from "./pages/Reservations";
-import Orders from "./pages/Orders";
-import Settings from "./pages/Settings";
-import Invoices from "./pages/Invoices";
-import Dashboard from "./pages/Dashboard";
-import Menu from "./pages/Menu";
-
+import { AuthProvider } from "@context/AuthContext";
+import { ThemeProvider } from "@context/ThemeContext";
+import ProtectedRoute from "@components/ProtectedRoute";
+import RoleProtectedRoute from "@components/RoleProtectedRoute";
+import DynamicFavicon from "@components/DynamicFavicon";
+import Login from "@pages/Login/Login";
+import Profile from "@pages/Profile/Profile";
+import Staff from "@pages/Staff/Staff";
+import Suppliers from "@pages/Suppliers/Suppliers";
+import Inventory from "@pages/Inventory/Inventory";
+import PaymentResult from "@pages/PaymentResult/PaymentResult";
+import DashboardLayout from "@layouts/DashboardLayout";
+import LandingPage from "@pages/LandingPage/LandingPage";
+import Tables from "@pages/Tables/Tables";
+import Reservations from "@pages/Reservations/Reservations";
+import Orders from "@pages/Orders/Orders";
+import Settings from "@pages/Settings/Settings";
+import Invoices from "@pages/Invoices/Invoices";
+import Dashboard from "@pages/Dashboard/Dashboard";
+import Menu from "@pages/Menu/Menu";
+import Reports from "@pages/Reports/Reports";
 function App() {
   return (
     <ThemeProvider>
@@ -116,7 +116,7 @@ function App() {
                   path="/reports"
                   element={
                     <RoleProtectedRoute allowedRoles={["admin", "manager"]}>
-                      <div>Reports Page (Implementation pending)</div>
+                      <Reports />
                     </RoleProtectedRoute>
                   }
                 />

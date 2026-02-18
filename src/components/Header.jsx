@@ -1,6 +1,6 @@
 import { Menu, Search, Bell, User, Sun, Moon, Languages } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme";
 import { useRestaurant } from "../hooks/useRestaurant";
 import { useTranslation } from "react-i18next";
 

@@ -108,20 +108,20 @@ const CustomerAnalytics = ({ dateRange = {} }) => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 animate-pulse"></div>
+        <div className="h-8   rounded w-48 animate-pulse"></div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 animate-pulse">
-            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="  rounded-lg shadow-sm p-6 animate-pulse">
+            <div className="h-32   rounded"></div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 animate-pulse">
-            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="  rounded-lg shadow-sm p-6 animate-pulse">
+            <div className="h-32   rounded"></div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 animate-pulse">
-            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="  rounded-lg shadow-sm p-6 animate-pulse">
+            <div className="h-32   rounded"></div>
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 animate-pulse">
-          <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div className="  rounded-lg shadow-sm p-6 animate-pulse">
+          <div className="h-48   rounded"></div>
         </div>
       </div>
     );
@@ -342,6 +342,7 @@ const CustomerAnalytics = ({ dateRange = {} }) => {
 
         .segment-container {
           display: flex;
+          gap: 10px;
           height: 60px;
           background: var(--bg-secondary);
           border-radius: var(--radius-md);
@@ -350,7 +351,7 @@ const CustomerAnalytics = ({ dateRange = {} }) => {
 
         .segment {
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
           align-items: center;
           justify-content: center;
           padding: 1rem;
@@ -360,6 +361,7 @@ const CustomerAnalytics = ({ dateRange = {} }) => {
         .new-segment {
           background: var(--primary);
           color: var(--primary-content);
+         
           border-radius: var(--radius-md) 0 0 var(--radius-md);
         }
 

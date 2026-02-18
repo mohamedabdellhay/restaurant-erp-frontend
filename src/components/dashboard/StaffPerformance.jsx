@@ -110,33 +110,33 @@ const StaffPerformance = ({ dateRange = {} }) => {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-6 animate-pulse"></div>
+      <div className=" rounded-lg shadow-sm p-6">
+        <div className="h-8  rounded w-48 mb-6 animate-pulse"></div>
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg animate-pulse"
+              className="flex items-center justify-between p-4  rounded-lg animate-pulse"
             >
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-full"></div>
+                <div className="w-10 h-10  rounded-full"></div>
                 <div className="flex-1">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-32 mb-2"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-24"></div>
+                  <div className="h-4  rounded w-32 mb-2"></div>
+                  <div className="h-3  rounded w-24"></div>
                 </div>
               </div>
               <div className="flex gap-8">
                 <div className="text-right">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-16 mb-2"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-12"></div>
+                  <div className="h-4  rounded w-16 mb-2"></div>
+                  <div className="h-3   rounded w-12"></div>
                 </div>
                 <div className="text-right">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-16 mb-2"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-12"></div>
+                  <div className="h-4   rounded w-16 mb-2"></div>
+                  <div className="h-3   rounded w-12"></div>
                 </div>
                 <div className="text-right">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-16 mb-2"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-12"></div>
+                  <div className="h-4   rounded w-16 mb-2"></div>
+                  <div className="h-3   rounded w-12"></div>
                 </div>
               </div>
             </div>
@@ -148,8 +148,8 @@ const StaffPerformance = ({ dateRange = {} }) => {
 
   if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-        <p className="text-red-600 dark:text-red-400">{error}</p>
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <p className="text-red-600">{error}</p>
       </div>
     );
   }

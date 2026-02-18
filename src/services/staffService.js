@@ -52,9 +52,11 @@ const staffService = {
   },
 
   // Toggle staff active status
-  toggleStatus: async (id) => {
+  toggleStatus: async (id, status) => {
     try {
-      const response = await api.patch(`/staff/${id}/toggle-status`);
+      const response = await api.patch(`/staff/${id}/toggle-status`, {
+        isActive: !status,
+      });
       return response.data;
     } catch (error) {
       throw error;

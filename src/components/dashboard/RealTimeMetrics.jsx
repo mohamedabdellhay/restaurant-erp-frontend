@@ -67,14 +67,14 @@ const RealTimeMetrics = () => {
     return (
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-medium text-gray-700">
             {t("dashboard.table_occupancy")}
           </span>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="text-sm text-gray-500 ">
             {occupied}/{total} ({occupancyRate.toFixed(1)}%)
           </span>
         </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+        <div className="w-full  rounded-full h-4">
           <div
             className={`h-4 rounded-full transition-all duration-500 ${
               occupancyRate > 80
@@ -96,10 +96,10 @@ const RealTimeMetrics = () => {
         {[...Array(4)].map((_, i) => (
           <div
             key={i}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 animate-pulse"
+            className="bg-white rounded-lg shadow-sm p-6 animate-pulse"
           >
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-4  rounded mb-2"></div>
+            <div className="h-8  rounded"></div>
           </div>
         ))}
       </div>

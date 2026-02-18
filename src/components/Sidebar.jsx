@@ -16,7 +16,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { useRestaurant } from "../hooks/useRestaurant";
 import { useTranslation } from "react-i18next";
 

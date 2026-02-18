@@ -1,23 +1,43 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useCallback } from "react";
 import api from "../services/api";
+import { useTheme } from "../hooks/useTheme";
 
 const AuthContext = createContext(null);
+
+export { AuthContext };
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { updateRestaurantSettings } = useTheme();
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const response = await api.get("/auth/me");
       const staff = response.data.data;
-      setUser(staff);
-      localStorage.setItem("user", JSON.stringify(staff));
+
+      // Extract restaurant settings from staff data
+      const restaurantSettings =
+        staff.restaurantSettings || staff.restaurant?.settings;
+
+      // Update user data with restaurant settings (fallback to empty object if not provided)
+      const userData = {
+        ...staff,
+        restaurantSettings: restaurantSettings || {},
+      };
+
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem(
+        "restaurantSettings",
+        JSON.stringify(restaurantSettings),
+      );
+      // Store restaurant settings separately for theme context (only if they exist and have content)
     } catch (err) {
       console.error("Failed to fetch profile", err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Check for existing session/token on mount
@@ -45,19 +65,32 @@ export const AuthProvider = ({ children }) => {
     }
 
     setLoading(false);
-  }, []);
+  }, [fetchProfile]);
 
   const login = async (email, password) => {
     setLoading(true);
     setError(null);
     try {
       const response = await api.post("/auth/login", { email, password });
-      const { staff, accessToken, refreshToken, restaurantSettings } =
-        response.data.data;
+      console.log("Full API response:", response.data);
+
+      const { staff, accessToken, refreshToken } = response.data.data;
+
+      console.log("Destructured values:", {
+        staff,
+        accessToken: accessToken ? "present" : "missing",
+        refreshToken: refreshToken ? "present" : "missing",
+      });
+
+      // Ensure restaurantSettings are properly extracted
+      const finalRestaurantSettings =
+        response.data.data.restaurantSettings ||
+        response.data.data.restaurant?.settings;
+      console.log("Final restaurant settings:", finalRestaurantSettings);
 
       const userData = {
         ...staff,
-        restaurantSettings,
+        restaurantSettings: finalRestaurantSettings,
       };
 
       setUser(userData);
@@ -66,11 +99,51 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("refresh_token", refreshToken);
 
       // Store restaurant settings separately for theme context
-      if (restaurantSettings) {
+      if (finalRestaurantSettings) {
+        console.log("Storing restaurant settings:", finalRestaurantSettings);
         localStorage.setItem(
           "restaurantSettings",
-          JSON.stringify(restaurantSettings),
+          JSON.stringify(finalRestaurantSettings),
         );
+        // Trigger theme update
+        console.log("Triggering theme update with:", finalRestaurantSettings);
+        updateRestaurantSettings(finalRestaurantSettings);
+      } else {
+        console.log(
+          "No restaurant settings in login response, fetching separately...",
+        );
+        // Fetch restaurant settings separately for non-admin users
+        try {
+          const restaurantResponse = await api.get("/restaurant/settings");
+          const fetchedSettings =
+            restaurantResponse.data.data || restaurantResponse.data;
+          if (fetchedSettings) {
+            console.log(
+              "Fetched restaurant settings separately:",
+              fetchedSettings,
+            );
+            // Update user data with fetched settings
+            const updatedUserData = {
+              ...userData,
+              restaurantSettings: fetchedSettings,
+            };
+            setUser(updatedUserData);
+            localStorage.setItem("user", JSON.stringify(updatedUserData));
+
+            // Store restaurant settings
+            localStorage.setItem(
+              "restaurantSettings",
+              JSON.stringify(fetchedSettings),
+            );
+            // Trigger theme update
+            updateRestaurantSettings(fetchedSettings);
+          }
+        } catch (fetchError) {
+          console.log(
+            "Failed to fetch restaurant settings separately:",
+            fetchError,
+          );
+        }
       }
 
       return true;
@@ -121,6 +194,8 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       localStorage.removeItem("user");
       localStorage.removeItem("token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("restaurantSettings");
     }
   };
 
@@ -139,13 +214,4 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  console.log(context);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 };

@@ -47,21 +47,21 @@ const TopSellingItems = ({ dateRange = {} }) => {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-6 animate-pulse"></div>
+      <div className=" rounded-lg shadow-sm p-6">
+        <div className="h-8  rounded w-48 mb-6 animate-pulse"></div>
         <div className="space-y-4">
           {[...Array(limit)].map((_, i) => (
             <div
               key={i}
-              className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg animate-pulse"
+              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg animate-pulse"
             >
               <div className="flex-1">
-                <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-32 mb-2"></div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-24"></div>
+                <div className="h-4  rounded w-32 mb-2"></div>
+                <div className="h-3  rounded w-24"></div>
               </div>
               <div className="text-right">
-                <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-20 mb-2"></div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-16"></div>
+                <div className="h-4  rounded w-20 mb-2"></div>
+                <div className="h-3  rounded w-16"></div>
               </div>
             </div>
           ))}
@@ -72,8 +72,8 @@ const TopSellingItems = ({ dateRange = {} }) => {
 
   if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-        <p className="text-red-600 dark:text-red-400">{error}</p>
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <p className="text-red-600">{error}</p>
       </div>
     );
   }

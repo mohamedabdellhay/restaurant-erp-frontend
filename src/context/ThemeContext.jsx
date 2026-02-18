@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect } from "react";
 
 const ThemeContext = createContext(null);
+
+export { ThemeContext };
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
@@ -9,21 +11,54 @@ export const ThemeProvider = ({ children }) => {
 
   const [restaurantSettings, setRestaurantSettings] = useState(() => {
     const settings = localStorage.getItem("restaurantSettings");
-    return settings ? JSON.parse(settings) : null;
+    if (!settings || settings === "undefined" || settings === "null") {
+      return null;
+    }
+    try {
+      return JSON.parse(settings);
+    } catch (error) {
+      console.error(
+        "Failed to parse restaurant settings from localStorage:",
+        error,
+      );
+      return null;
+    }
   });
 
   useEffect(() => {
     // Listen for storage changes (when user logs in)
-
-    // Listen for storage changes (when user logs in)
     const handleStorageChange = (e) => {
       if (e.key === "restaurantSettings" && e.newValue) {
-        setRestaurantSettings(JSON.parse(e.newValue));
+        if (e.newValue === "undefined" || e.newValue === "null") {
+          setRestaurantSettings(null);
+        } else {
+          try {
+            setRestaurantSettings(JSON.parse(e.newValue));
+          } catch (error) {
+            console.error(
+              "Failed to parse restaurant settings from storage change:",
+              error,
+            );
+            setRestaurantSettings(null);
+          }
+        }
+      }
+    };
+
+    // Custom event for same-tab updates
+    const handleThemeUpdate = (e) => {
+      if (e.detail?.restaurantSettings) {
+        setRestaurantSettings(e.detail.restaurantSettings);
       }
     };
 
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    window.addEventListener("restaurantSettingsUpdate", handleThemeUpdate);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("restaurantSettingsUpdate", handleThemeUpdate);
+    };
   }, []);
 
   useEffect(() => {
@@ -55,6 +90,13 @@ export const ThemeProvider = ({ children }) => {
   const updateRestaurantSettings = (newSettings) => {
     setRestaurantSettings(newSettings);
     localStorage.setItem("restaurantSettings", JSON.stringify(newSettings));
+
+    // Trigger custom event for same-tab updates
+    window.dispatchEvent(
+      new CustomEvent("restaurantSettingsUpdate", {
+        detail: { restaurantSettings: newSettings },
+      }),
+    );
   };
 
   return (
@@ -69,12 +111,4 @@ export const ThemeProvider = ({ children }) => {
       {children}
     </ThemeContext.Provider>
   );
-};
-
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return context;
 };
