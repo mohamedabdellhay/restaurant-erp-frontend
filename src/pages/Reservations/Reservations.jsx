@@ -419,8 +419,7 @@ const Reservations = () => {
     }
   };
 
-  const getTableName = (tableId) => {
-    const table = tables.find((t) => t._id === tableId);
+  const getTableName = (table) => {
     return table ? table.number : "Unknown";
   };
 
@@ -604,7 +603,14 @@ const Reservations = () => {
                         </div>
                       </td>
                       <td data-direction={i18n.dir()}>
-                        <div className="table-info">
+                        <div
+                          className="table-info"
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
                           <MapPin size={16} />
                           <span>{getTableName(reservation.table)}</span>
                         </div>

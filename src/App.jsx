@@ -108,6 +108,9 @@ function App() {
                 {/* Inventory - Any logged-in staff */}
                 <Route path="/inventory" element={<Inventory />} />
 
+                {/* Menu - Any logged-in staff */}
+                <Route path="/menu" element={<Menu />} />
+
                 {/* Invoices - Any logged-in staff */}
                 <Route path="/invoices" element={<Invoices />} />
 

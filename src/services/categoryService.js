@@ -4,7 +4,7 @@ const categoryService = {
   // Get all categories
   getAll: async () => {
     try {
-      const response = await api.get("/categories");
+      const response = await api.get("/categories", { auth: true });
       return response.data;
     } catch (error) {
       throw error;
@@ -14,7 +14,7 @@ const categoryService = {
   // Get category by ID
   getById: async (id) => {
     try {
-      const response = await api.get(`/categories/${id}`);
+      const response = await api.get(`/categories/${id}`, { auth: true });
       return response.data;
     } catch (error) {
       throw error;
@@ -24,7 +24,9 @@ const categoryService = {
   // Create new category (Admin or Manager only)
   create: async (categoryData) => {
     try {
-      const response = await api.post("/categories", categoryData);
+      const response = await api.post("/categories", categoryData, {
+        auth: true,
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -34,7 +36,9 @@ const categoryService = {
   // Update category (Admin or Manager only)
   update: async (id, categoryData) => {
     try {
-      const response = await api.put(`/categories/${id}`, categoryData);
+      const response = await api.put(`/categories/${id}`, categoryData, {
+        auth: true,
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -44,7 +48,7 @@ const categoryService = {
   // Delete category (Admin only)
   delete: async (id) => {
     try {
-      const response = await api.delete(`/categories/${id}`);
+      const response = await api.delete(`/categories/${id}`, { auth: true });
       return response.data;
     } catch (error) {
       throw error;

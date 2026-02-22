@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Tables.css";
 import { useTranslation } from "react-i18next";
-import { useRestaurant } from "@hooks/useRestaurant";
+// import { useRestaurant } from "@hooks/useRestaurant";
 import {
   SquareMenu,
   Plus,
@@ -21,13 +21,13 @@ import tableService from "@services/tableService";
 
 const Tables = () => {
   const { t, i18n } = useTranslation();
-  const { getThemeColors } = useRestaurant();
+  // const { getThemeColors } = useRestaurant();
 
   // Get theme colors for dynamic styling
-  const themeColors = getThemeColors();
-  const primaryColor = themeColors.primary || "#f59e0b";
-  const secondaryColor = themeColors.secondary || "#6366f1";
-  const accentColor = themeColors.accent || "#10b981";
+  // const themeColors = getThemeColors();
+  // const primaryColor = themeColors.primary || "#f59e0b";
+  // const secondaryColor = themeColors.secondary || "#6366f1";
+  // const accentColor = themeColors.accent || "#10b981";
 
   const [tables, setTables] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ const Tables = () => {
   const [selectedTable, setSelectedTable] = useState(null);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [filterStatus, setFilterStatus] = useState("all");
-
+  const user = JSON.parse(localStorage.getItem("user"));
   // Auto-hide message after 3 seconds
   useEffect(() => {
     if (message.text) {
@@ -148,15 +148,18 @@ const Tables = () => {
   const availableTablesCount = tables.filter(
     (table) => table.status === "available",
   ).length;
+
   const occupiedTablesCount = tables.filter(
     (table) => table.status === "occupied",
   ).length;
+
   const reservedTablesCount = tables.filter(
     (table) => table.status === "reserved",
   ).length;
-  const maintenanceTablesCount = tables.filter(
-    (table) => table.status === "maintenance",
-  ).length;
+
+  // const maintenanceTablesCount = tables.filter(
+  //   (table) => table.status === "maintenance",
+  // ).length;
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -173,20 +176,20 @@ const Tables = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "available":
-        return "var(--success)";
-      case "occupied":
-        return "var(--primary)";
-      case "reserved":
-        return "var(--warning)";
-      case "maintenance":
-        return "var(--danger)";
-      default:
-        return "var(--text-muted)";
-    }
-  };
+  // const getStatusColor = (status) => {
+  //   switch (status) {
+  //     case "available":
+  //       return "var(--success)";
+  //     case "occupied":
+  //       return "var(--primary)";
+  //     case "reserved":
+  //       return "var(--warning)";
+  //     case "maintenance":
+  //       return "var(--danger)";
+  //     default:
+  //       return "var(--text-muted)";
+  //   }
+  // };
 
   return (
     <div className="tables-page" data-direction={i18n.dir()}>
@@ -333,22 +336,24 @@ const Tables = () => {
 
                   <div className="table-body"></div>
 
-                  <div className="table-actions">
-                    <button
-                      onClick={() => handleEdit(table)}
-                      className="btn-icon btn-edit"
-                      title={t("common.edit")}
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(table._id)}
-                      className="btn-icon btn-delete"
-                      title={t("common.delete")}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
+                  {["admin", "manager"].includes(user?.role) && (
+                    <div className="table-actions">
+                      <button
+                        onClick={() => handleEdit(table)}
+                        className="btn-icon btn-edit"
+                        title={t("common.edit")}
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(table._id)}
+                        className="btn-icon btn-delete"
+                        title={t("common.delete")}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))
             )}

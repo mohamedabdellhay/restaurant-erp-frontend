@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Inventory.css";
 import { useTranslation } from "react-i18next";
-import { useRestaurant } from "@hooks/useRestaurant";
 import {
   Plus,
   Search,
@@ -18,21 +17,19 @@ import {
   ArrowDown,
   Eye,
   Download,
+  ChevronDown,
 } from "lucide-react";
 import inventoryService from "@services/inventoryService";
+import supplierService from "@services/supplierService";
 
 const Inventory = () => {
   const { t, i18n } = useTranslation();
-  const { getThemeColors } = useRestaurant();
 
   // Get theme colors for dynamic styling
-  const themeColors = getThemeColors();
-  const primaryColor = themeColors.primary || "#f59e0b";
-  const secondaryColor = themeColors.secondary || "#6366f1";
-  const accentColor = themeColors.accent || "#10b981";
 
   const [items, setItems] = useState([]);
   const [lowStockItems, setLowStockItems] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -45,6 +42,8 @@ const Inventory = () => {
     amount: "",
     type: "addition",
   });
+  const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
+  const [showSupplierDropdown, setShowSupplierDropdown] = useState(false);
 
   // Form state for add/edit
   const [formData, setFormData] = useState({
@@ -59,6 +58,7 @@ const Inventory = () => {
   useEffect(() => {
     fetchItems();
     fetchLowStockItems();
+    fetchSuppliers();
   }, []);
 
   // Auto-hide message after 3 seconds
@@ -71,6 +71,21 @@ const Inventory = () => {
       return () => clearTimeout(timer);
     }
   }, [message]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showSupplierDropdown &&
+        !event.target.closest(".supplier-search-dropdown")
+      ) {
+        setShowSupplierDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showSupplierDropdown]);
 
   const fetchItems = async () => {
     try {
@@ -94,6 +109,15 @@ const Inventory = () => {
       setLowStockItems(response.data || response);
     } catch (error) {
       console.error("Failed to fetch low stock items:", error);
+    }
+  };
+
+  const fetchSuppliers = async () => {
+    try {
+      const response = await supplierService.getAll();
+      setSuppliers(response.data || response);
+    } catch (error) {
+      console.error("Failed to fetch suppliers:", error);
     }
   };
 
@@ -133,6 +157,15 @@ const Inventory = () => {
       supplier: item.supplier || "",
       minStockAlert: item.minStockAlert || 10,
     });
+
+    // Set supplier search term to show supplier name if supplier exists
+    if (item.supplier) {
+      const supplier = suppliers.find((s) => s._id === item.supplier);
+      setSupplierSearchTerm(supplier ? supplier.name : "");
+    } else {
+      setSupplierSearchTerm("");
+    }
+
     setShowEditModal(true);
   };
 
@@ -162,8 +195,31 @@ const Inventory = () => {
 
   const handleStockSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate input
+    const amount = parseFloat(stockUpdateData.amount);
+    if (isNaN(amount) || amount <= 0) {
+      setMessage({
+        type: "error",
+        text: "Please enter a valid positive number for stock amount",
+      });
+      return;
+    }
+
     try {
-      await inventoryService.updateStock(selectedItem._id, stockUpdateData);
+      console.log("Updating stock for item:", selectedItem._id);
+      console.log("Stock update data:", {
+        amount: amount,
+        type: stockUpdateData.type,
+      });
+
+      const response = await inventoryService.updateStock(selectedItem._id, {
+        amount: amount,
+        type: stockUpdateData.type,
+      });
+
+      console.log("Stock update response:", response);
+
       setMessage({ type: "success", text: "Stock updated successfully!" });
       setShowStockModal(false);
       setStockUpdateData({ amount: "", type: "addition" });
@@ -171,6 +227,7 @@ const Inventory = () => {
       fetchItems();
       fetchLowStockItems();
     } catch (error) {
+      console.error("Stock update error:", error);
       setMessage({
         type: "error",
         text: error.response?.data?.message || "Failed to update stock",
@@ -188,6 +245,17 @@ const Inventory = () => {
       minStockAlert: 10,
     });
     setSelectedItem(null);
+    setSupplierSearchTerm("");
+  };
+
+  const filteredSuppliers = suppliers.filter((supplier) =>
+    supplier.name.toLowerCase().includes(supplierSearchTerm.toLowerCase()),
+  );
+
+  const handleSupplierSelect = (supplier) => {
+    setFormData({ ...formData, supplier: supplier._id });
+    setSupplierSearchTerm(supplier.name);
+    setShowSupplierDropdown(false);
   };
 
   const filteredItems = items.filter((item) => {
@@ -203,16 +271,20 @@ const Inventory = () => {
   });
 
   const getStockLevelColor = (currentStock, minStock) => {
-    const percentage = (currentStock / minStock) * 100;
-    if (percentage <= 25) return "#ef4444"; // Red
-    if (percentage <= 50) return "#f59e0b"; // Orange
+    // Handle division by zero 2/5*100
+    if (!minStock || minStock === 0) return "#10b981"; // Green
+    const percentage = (Number(currentStock) / Number(minStock)) * 100;
+    if (percentage <= 60) return "#ef4444"; // Red
+    if (percentage <= 100) return "#f59e0b"; // Orange
     return "#10b981"; // Green
   };
 
   const getStockLevelLabel = (currentStock, minStock) => {
-    const percentage = (currentStock / minStock) * 100;
-    if (percentage <= 25) return "Critical";
-    if (percentage <= 50) return "Low";
+    // Handle division by zero
+    if (!minStock || minStock === 0) return "Good";
+    const percentage = (Number(currentStock) / Number(minStock)) * 100;
+    if (percentage <= 60) return "Critical";
+    if (percentage <= 100) return "Low";
     return "Good";
   };
 
@@ -397,7 +469,9 @@ const Inventory = () => {
                             ),
                           }}
                         ></div>
-                        {getStockLevelLabel(item.stock, item.minStockAlert)}
+                        {t(
+                          `inventory.${getStockLevelLabel(item.stock, item.minStockAlert).toLowerCase()}`,
+                        )}
                       </span>
                     </td>
                     <td>
@@ -520,18 +594,68 @@ const Inventory = () => {
                 </div>
                 <div className="form-group">
                   <label>{t("inventory.supplier") || "Supplier"}</label>
-                  <input
-                    type="text"
-                    name="supplier"
-                    value={formData.supplier}
-                    onChange={(e) =>
-                      setFormData({ ...formData, supplier: e.target.value })
-                    }
-                    placeholder={
-                      t("inventory.supplier_placeholder") || "Enter supplier ID"
-                    }
-                    className="form-input"
-                  />
+                  <div className="supplier-search-dropdown">
+                    <div className="supplier-input-wrapper">
+                      <input
+                        type="text"
+                        name="supplier"
+                        value={supplierSearchTerm}
+                        onChange={(e) => {
+                          setSupplierSearchTerm(e.target.value);
+                          setShowSupplierDropdown(true);
+                        }}
+                        onFocus={() => setShowSupplierDropdown(true)}
+                        placeholder={
+                          t("inventory.supplier_placeholder") ||
+                          "Search supplier..."
+                        }
+                        className="form-input"
+                      />
+                      <ChevronDown
+                        size={20}
+                        className="dropdown-arrow"
+                        onClick={() =>
+                          setShowSupplierDropdown(!showSupplierDropdown)
+                        }
+                      />
+                    </div>
+                    {showSupplierDropdown && (
+                      <div className="supplier-dropdown-list">
+                        {filteredSuppliers.length === 0 ? (
+                          <div className="no-suppliers-found">
+                            {t("inventory.no_suppliers_found") ||
+                              "No suppliers found"}
+                          </div>
+                        ) : (
+                          filteredSuppliers.map((supplier) => (
+                            <div
+                              key={supplier._id}
+                              className="supplier-option"
+                              onClick={() => handleSupplierSelect(supplier)}
+                            >
+                              <div className="supplier-info">
+                                <div className="supplier-name">
+                                  {supplier.name}
+                                </div>
+                                <div className="supplier-details">
+                                  {supplier.phone && (
+                                    <span className="supplier-phone">
+                                      {supplier.phone}
+                                    </span>
+                                  )}
+                                  {supplier.paymentTerms && (
+                                    <span className="supplier-terms">
+                                      {supplier.paymentTerms}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="form-group">
                   <label>
@@ -601,6 +725,47 @@ const Inventory = () => {
             </div>
             <form onSubmit={handleStockSubmit}>
               <div className="modal-body">
+                <div className="current-stock-info">
+                  <p>
+                    <strong>
+                      {t("inventory.current_stock") || "Current Stock"}:
+                    </strong>{" "}
+                    {selectedItem.stock || 0} {selectedItem.unit || ""}
+                  </p>
+                  <p>
+                    <strong>
+                      {t("inventory.min_stock_alert") || "Min Stock Alert"}:
+                    </strong>{" "}
+                    {selectedItem.minStockAlert || 10} {selectedItem.unit || ""}
+                  </p>
+                  {stockUpdateData.amount && (
+                    <p className="stock-preview">
+                      <strong>
+                        {t("inventory.new_stock") || "New Stock"}:
+                      </strong>
+                      <span
+                        className={
+                          stockUpdateData.type === "addition"
+                            ? "stock-addition"
+                            : "stock-deduction"
+                        }
+                      >
+                        {stockUpdateData.type === "addition" ? "+" : "-"}
+                        {stockUpdateData.amount} ={" "}
+                        {stockUpdateData.type === "addition"
+                          ? (
+                              parseFloat(selectedItem.stock || 0) +
+                              parseFloat(stockUpdateData.amount)
+                            ).toFixed(0)
+                          : (
+                              parseFloat(selectedItem.stock || 0) -
+                              parseFloat(stockUpdateData.amount)
+                            ).toFixed(0)}{" "}
+                        {selectedItem.unit || ""}
+                      </span>
+                    </p>
+                  )}
+                </div>
                 <div className="form-group">
                   <label>
                     {t("inventory.stock_amount") || "Stock Amount"} *

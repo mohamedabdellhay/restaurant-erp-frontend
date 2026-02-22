@@ -19,15 +19,20 @@ import {
   XCircle,
   ChefHat,
   Loader2,
+  Package,
+  AlertTriangle,
 } from "lucide-react";
 import menuService from "@services/menuService";
-import categoryService from "@services/categoryService";
+import inventoryService from "@services/inventoryService";
 import uploadService from "@services/uploadService";
+import categoryService from "@services/categoryService";
 
 const Menu = () => {
   const { t, i18n } = useTranslation();
   const { getThemeColors } = useRestaurant();
   const { user } = useAuth();
+  const currentLang = i18n.language;
+  console.log("current", currentLang);
 
   // Get theme colors for dynamic styling
   const themeColors = getThemeColors();
@@ -35,17 +40,28 @@ const Menu = () => {
 
   const [menuItems, setMenuItems] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [inventoryItems, setInventoryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showRecipeModal, setShowRecipeModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedRecipeItem, setSelectedRecipeItem] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [message, setMessage] = useState({ type: "", text: "" });
 
   // Image upload state
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Category form state
+  const [categoryFormData, setCategoryFormData] = useState({
+    name: "",
+    description: "",
+    isActive: true,
+  });
 
   // Form state for add/edit
   const [formData, setFormData] = useState({
@@ -80,25 +96,40 @@ const Menu = () => {
       const response = await categoryService.getAll();
       setCategories(response.data || response || []);
     } catch (error) {
-      console.error("Failed to fetch categories", error);
+      setMessage({
+        type: "error",
+        text:
+          error.response?.data?.message || t("menu.error_fetching_categories"),
+      });
+    }
+  };
+
+  const fetchInventoryItems = async () => {
+    try {
+      const response = await inventoryService.getAll();
+      setInventoryItems(response.data || response || []);
+    } catch (error) {
+      console.error("Failed to fetch inventory items", error);
     }
   };
 
   useEffect(() => {
     fetchMenuItems();
     fetchCategories();
+    fetchInventoryItems();
   }, [fetchMenuItems]);
 
   // Category CRUD operations
   const handleCreateCategory = async (categoryData) => {
     try {
       await categoryService.create(categoryData);
-      setMessage({ type: "success", text: "Category created successfully!" });
+      setMessage({ type: "success", text: t("menu.category_created") });
       fetchCategories();
     } catch (error) {
       setMessage({
         type: "error",
-        text: error.response?.data?.message || "Failed to create category",
+        text:
+          error.response?.data?.message || t("menu.error_creating_category"),
       });
     }
   };
@@ -106,12 +137,13 @@ const Menu = () => {
   const handleUpdateCategory = async (id, categoryData) => {
     try {
       await categoryService.update(id, categoryData);
-      setMessage({ type: "success", text: "Category updated successfully!" });
+      setMessage({ type: "success", text: t("menu.category_updated") });
       fetchCategories();
     } catch (error) {
       setMessage({
         type: "error",
-        text: error.response?.data?.message || "Failed to update category",
+        text:
+          error.response?.data?.message || t("menu.error_updating_category"),
       });
     }
   };
@@ -120,14 +152,53 @@ const Menu = () => {
     if (window.confirm(t("menu.confirm_delete_category"))) {
       try {
         await categoryService.delete(id);
-        setMessage({ type: "success", text: "Category deleted successfully!" });
+        setMessage({ type: "success", text: t("menu.category_deleted") });
         fetchCategories();
       } catch (error) {
         setMessage({
           type: "error",
-          text: error.response?.data?.message || "Failed to delete category",
+          text:
+            error.response?.data?.message || t("menu.error_deleting_category"),
         });
       }
+    }
+  };
+
+  const handleOpenCategoryModal = (category = null) => {
+    setSelectedCategory(category);
+    if (category) {
+      setCategoryFormData({
+        name: category.name,
+        description: category.description || "",
+        isActive: category.isActive,
+      });
+    } else {
+      setCategoryFormData({
+        name: "",
+        description: "",
+        isActive: true,
+      });
+    }
+    setShowCategoryModal(true);
+  };
+
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (selectedCategory) {
+        await handleUpdateCategory(selectedCategory._id, categoryFormData);
+      } else {
+        await handleCreateCategory(categoryFormData);
+      }
+      setShowCategoryModal(false);
+      setSelectedCategory(null);
+      setCategoryFormData({
+        name: "",
+        description: "",
+        isActive: true,
+      });
+    } catch (error) {
+      console.error("Category submission error:", error);
     }
   };
 
@@ -135,18 +206,37 @@ const Menu = () => {
     e.preventDefault();
     try {
       const data = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
         price: parseFloat(formData.price),
+        category: formData.category || null, // Handle empty category
+        isActive: formData.isActive,
+        recipe: formData.recipe,
+        modifiers: formData.modifiers,
       };
 
+      // Only include image field if it has a value
+      if (formData.image && formData.image.trim() !== "") {
+        data.image = formData.image;
+      }
+
+      // Validate required fields
+      if (!data.name || !data.price || !data.category || data.category === "") {
+        setMessage({
+          type: "error",
+          text: "Please fill in all required fields (name, price, category)",
+        });
+        return;
+      }
+
       if (selectedItem) {
-        await menuService.update(selectedItem._id, data);
+        const updatedItem = await menuService.update(selectedItem._id, data);
         setMessage({
           type: "success",
           text: "Menu item updated successfully!",
         });
       } else {
-        await menuService.create(data);
+        const createdItem = await menuService.create(data);
         setMessage({
           type: "success",
           text: "Menu item created successfully!",
@@ -228,6 +318,42 @@ const Menu = () => {
       i === index ? { ...item, [field]: value } : item,
     );
     setFormData({ ...formData, recipe: newRecipe });
+  };
+
+  // Recipe management functions
+  const handleOpenRecipeModal = async (item) => {
+    try {
+      setSelectedRecipeItem(item);
+      const recipeData = await menuService.getRecipe(item._id);
+      setFormData({
+        ...item,
+        recipe: recipeData.data?.recipe || [],
+      });
+      setShowRecipeModal(true);
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error.response?.data?.message || "Failed to fetch recipe",
+      });
+    }
+  };
+
+  const handleRecipeSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await menuService.updateRecipe(selectedRecipeItem._id, {
+        recipe: formData.recipe,
+      });
+      setMessage({ type: "success", text: "Recipe updated successfully!" });
+      setShowRecipeModal(false);
+      setSelectedRecipeItem(null);
+      fetchMenuItems();
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error.response?.data?.message || "Failed to update recipe",
+      });
+    }
   };
 
   const handleAddModifier = () => {
@@ -325,7 +451,7 @@ const Menu = () => {
         <RoleBasedUI user={user} allowedRoles={["admin", "manager"]}>
           <div className="header-actions">
             <button
-              onClick={() => setShowCategoryModal(true)}
+              onClick={() => handleOpenCategoryModal()}
               className="btn-secondary"
             >
               <Filter size={20} />
@@ -333,8 +459,9 @@ const Menu = () => {
             </button>
             <button
               onClick={() => {
-                resetForm();
                 setShowAddModal(true);
+                setSelectedItem(null);
+                resetForm();
               }}
               className="btn-primary"
             >
@@ -452,6 +579,21 @@ const Menu = () => {
                     <ChefHat size={14} />
                     {item.category?.name || t("menu.uncategorized")}
                   </span>
+                  <span
+                    className={`availability-status ${item.isAvailable ? "available" : "unavailable"}`}
+                  >
+                    {item.isAvailable ? (
+                      <>
+                        <CheckCircle size={14} />
+                        {t("menu.available")}
+                      </>
+                    ) : (
+                      <>
+                        <XCircle size={14} />
+                        {t("menu.out_of_stock")}
+                      </>
+                    )}
+                  </span>
                 </div>
                 <div className="menu-card-actions">
                   <RoleBasedUI user={user} allowedRoles={["admin", "manager"]}>
@@ -463,6 +605,13 @@ const Menu = () => {
                       <Edit size={16} />
                     </button>
                   </RoleBasedUI>
+                  <button
+                    onClick={() => handleOpenRecipeModal(item)}
+                    className="btn-icon btn-recipe"
+                    title={t("menu.manage_recipe")}
+                  >
+                    <Package size={16} />
+                  </button>
                   <RoleBasedUI user={user} allowedRoles={["admin"]}>
                     <button
                       onClick={() => handleDelete(item._id)}
@@ -538,12 +687,13 @@ const Menu = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>{t("menu.category")}</label>
+                  <label>{t("menu.category")} *</label>
                   <select
                     value={formData.category}
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
+                    required
                   >
                     <option value="">{t("menu.select_category")}</option>
                     {categories.map((cat) => (
@@ -613,6 +763,84 @@ const Menu = () => {
                   />
                   {t("menu.is_active")}
                 </label>
+              </div>
+
+              {/* Recipe Section */}
+              <div className="recipe-section">
+                <div className="section-header">
+                  <label>{t("menu.recipe")}</label>
+                  <button
+                    type="button"
+                    onClick={handleAddRecipeItem}
+                    className="btn-small btn-secondary"
+                  >
+                    <Plus size={14} />
+                    {t("menu.add_ingredient")}
+                  </button>
+                </div>
+                {formData.recipe.map((recipeItem, index) => (
+                  <div key={index} className="recipe-row">
+                    {recipeItem.inventoryItem &&
+                    (typeof recipeItem.inventoryItem === "object"
+                      ? recipeItem.inventoryItem._id
+                      : recipeItem.inventoryItem) ? (
+                      // Show selected item as text when editing
+                      <div className="recipe-item-display">
+                        {typeof recipeItem.inventoryItem === "object"
+                          ? recipeItem.inventoryItem.name
+                          : inventoryItems.find(
+                              (item) => item._id === recipeItem.inventoryItem,
+                            )?.name || t("menu.select_ingredient")}
+                      </div>
+                    ) : (
+                      // Show dropdown for new items
+                      <select
+                        value={
+                          typeof recipeItem.inventoryItem === "object"
+                            ? recipeItem.inventoryItem._id
+                            : recipeItem.inventoryItem
+                        }
+                        onChange={(e) =>
+                          handleUpdateRecipeItem(
+                            index,
+                            "inventoryItem",
+                            e.target.value,
+                          )
+                        }
+                        className="recipe-select"
+                      >
+                        <option value="">{t("menu.select_ingredient")}</option>
+                        {inventoryItems.map((item) => (
+                          <option key={item._id} value={item._id}>
+                            {item.name} ({item.stock} {item.unit})
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder={t("menu.quantity")}
+                      value={recipeItem.qty}
+                      onChange={(e) =>
+                        handleUpdateRecipeItem(
+                          index,
+                          "qty",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
+                      className="recipe-qty"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveRecipeItem(index)}
+                      className="btn-icon btn-delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
               </div>
 
               {/* Modifiers Section */}
@@ -692,17 +920,263 @@ const Menu = () => {
         </div>
       )}
 
+      {/* Recipe Management Modal */}
+      {showRecipeModal && selectedRecipeItem && (
+        <div className="modal-overlay">
+          <div className="modal modal-large">
+            <div className="modal-header">
+              <h2>
+                <Package size={20} />
+                {t("menu.manage_recipe")} - {selectedRecipeItem.name}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowRecipeModal(false);
+                  setSelectedRecipeItem(null);
+                }}
+                className="btn-close"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleRecipeSubmit} className="recipe-form">
+              <div className="modal-body">
+                <div className="recipe-section">
+                  <div className="section-header">
+                    <label>{t("menu.recipe")}</label>
+                    <button
+                      type="button"
+                      onClick={handleAddRecipeItem}
+                      className="btn-small btn-secondary"
+                    >
+                      <Plus size={14} />
+                      {t("menu.add_ingredient")}
+                    </button>
+                  </div>
+                  {formData.recipe.map((recipeItem, index) => (
+                    <div key={index} className="recipe-row">
+                      <select
+                        value={recipeItem.inventoryItem}
+                        onChange={(e) =>
+                          handleUpdateRecipeItem(
+                            index,
+                            "inventoryItem",
+                            e.target.value,
+                          )
+                        }
+                        className="recipe-select"
+                        disabled={
+                          recipeItem.inventoryItem !== "" &&
+                          recipeItem.inventoryItem !== undefined
+                        }
+                      >
+                        <option value="">{t("menu.select_ingredient")}</option>
+                        {inventoryItems.map((item) => (
+                          <option key={item._id} value={item._id}>
+                            {item.name} ({item.stock} {item.unit})
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder={t("menu.quantity")}
+                        value={recipeItem.qty}
+                        onChange={(e) =>
+                          handleUpdateRecipeItem(
+                            index,
+                            "qty",
+                            parseFloat(e.target.value) || 0,
+                          )
+                        }
+                        className="recipe-qty"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveRecipeItem(index)}
+                        className="btn-icon btn-delete"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRecipeModal(false);
+                    setSelectedRecipeItem(null);
+                  }}
+                  className="btn-secondary"
+                >
+                  {t("common.cancel")}
+                </button>
+                <button type="submit" className="btn-primary">
+                  <Save size={16} />
+                  {t("menu.update_recipe")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Category Management Modal */}
       {showCategoryModal && (
-        <CategoryManagementModal
-          categories={categories}
-          onClose={() => setShowCategoryModal(false)}
-          onCreate={handleCreateCategory}
-          onUpdate={handleUpdateCategory}
-          onDelete={handleDeleteCategory}
-          t={t}
-          user={user}
-        />
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h2>
+                <Filter size={20} />
+                {selectedCategory
+                  ? t("menu.edit_category")
+                  : t("menu.add_category")}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowCategoryModal(false);
+                  setSelectedCategory(null);
+                  setCategoryFormData({
+                    name: "",
+                    description: "",
+                    isActive: true,
+                  });
+                }}
+                className="btn-close"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleCategorySubmit} className="category-form">
+              <div className="modal-body">
+                {/* Existing Categories List */}
+                <div className="existing-categories">
+                  <h3>{t("menu.existing_categories")}</h3>
+                  {categories.length === 0 ? (
+                    <p className="no-categories">{t("menu.no_categories")}</p>
+                  ) : (
+                    <div className="categories-list">
+                      {categories.map((category) => (
+                        <div key={category._id} className="category-item">
+                          <div className="category-info">
+                            <h4>{category.name}</h4>
+                            {category.description && (
+                              <p>{category.description}</p>
+                            )}
+                            <span
+                              className={`status-badge ${category.isActive ? "active" : "inactive"}`}
+                            >
+                              {category.isActive
+                                ? t("menu.active")
+                                : t("menu.inactive")}
+                            </span>
+                          </div>
+                          <div className="category-actions">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenCategoryModal(category)}
+                              className="btn-icon btn-edit"
+                              title={t("common.edit")}
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCategory(category._id)}
+                              className="btn-icon btn-delete"
+                              title={t("common.delete")}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Add/Edit Category Form */}
+                <div className="category-form-section">
+                  <h3>
+                    {selectedCategory
+                      ? t("menu.edit_category")
+                      : t("menu.add_category")}
+                  </h3>
+                  <div className="form-group">
+                    <label>{t("menu.category_name")} *</label>
+                    <input
+                      type="text"
+                      value={categoryFormData.name}
+                      onChange={(e) =>
+                        setCategoryFormData({
+                          ...categoryFormData,
+                          name: e.target.value,
+                        })
+                      }
+                      required
+                      placeholder={t("menu.category_name_placeholder")}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>{t("menu.category_description")}</label>
+                    <textarea
+                      value={categoryFormData.description}
+                      onChange={(e) =>
+                        setCategoryFormData({
+                          ...categoryFormData,
+                          description: e.target.value,
+                        })
+                      }
+                      rows="3"
+                      placeholder={t("menu.category_description_placeholder")}
+                    />
+                  </div>
+                  <div className="form-group checkbox-group">
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={categoryFormData.isActive}
+                        onChange={(e) =>
+                          setCategoryFormData({
+                            ...categoryFormData,
+                            isActive: e.target.checked,
+                          })
+                        }
+                      />
+                      {t("menu.category_active")}
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCategoryModal(false);
+                    setSelectedCategory(null);
+                    setCategoryFormData({
+                      name: "",
+                      description: "",
+                      isActive: true,
+                    });
+                  }}
+                  className="btn-secondary"
+                >
+                  {t("common.cancel")}
+                </button>
+                <button type="submit" className="btn-primary">
+                  <Save size={16} />
+                  {selectedCategory
+                    ? t("menu.update_category")
+                    : t("menu.create_category")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

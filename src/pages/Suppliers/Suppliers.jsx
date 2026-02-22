@@ -87,7 +87,10 @@ const Suppliers = () => {
     e.preventDefault();
     try {
       if (selectedSupplier) {
+        console.log("Updating supplier:", selectedSupplier._id, formData);
         // Update supplier
+        console.log("form data", formData);
+
         await supplierService.update(selectedSupplier._id, formData);
         setMessage({ type: "success", text: "Supplier updated successfully!" });
       } else {
@@ -137,7 +140,7 @@ const Suppliers = () => {
   const handleViewStatement = async (supplier) => {
     try {
       const response = await supplierService.getStatement(supplier._id);
-      setStatementData(response.data || response);
+      setStatementData(response.data.transactions || response);
       setSelectedSupplier(supplier);
       setShowStatementModal(true);
     } catch (error) {
@@ -610,7 +613,9 @@ const Suppliers = () => {
                     {statementData.map((transaction, index) => (
                       <tr key={index}>
                         <td>
-                          {new Date(transaction.date).toLocaleDateString()}
+                          {new Date(transaction.createdAt).toLocaleDateString(
+                            "en-GB",
+                          )}
                         </td>
                         <td>{transaction.description}</td>
                         <td>{transaction.type}</td>
@@ -625,12 +630,12 @@ const Suppliers = () => {
                         </td>
                         <td
                           className={
-                            transaction.balance >= 0
+                            transaction.amount >= 0
                               ? "balance-positive"
                               : "balance-negative"
                           }
                         >
-                          ${transaction.balance.toFixed(2)}
+                          ${transaction.amount.toFixed(2)}
                         </td>
                       </tr>
                     ))}

@@ -357,6 +357,7 @@
 .duration-info,
 .notes-info {
   display: flex;
+  flex-direction: row !important;
   align-items: center;
   gap: 0.5rem;
 }
@@ -367,7 +368,7 @@
 [data-direction="rtl"] .guests-info,
 [data-direction="rtl"] .duration-info,
 [data-direction="rtl"] .notes-info {
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .status-badge {

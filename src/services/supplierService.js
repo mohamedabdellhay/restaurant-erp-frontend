@@ -1,10 +1,10 @@
-import api from './api';
+import api from "./api";
 
 const supplierService = {
   // Get all suppliers
   getAll: async () => {
     try {
-      const response = await api.get('/inventory/suppliers');
+      const response = await api.get("/inventory/suppliers", { auth: true });
       return response.data;
     } catch (error) {
       throw error;
@@ -13,48 +13,42 @@ const supplierService = {
 
   // Get supplier by ID
   getById: async (id) => {
-    try {
-      const response = await api.get(`/inventory/suppliers/${id}`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.get(`/inventory/suppliers/${id}`, {
+      auth: true,
+    });
+    return response.data;
   },
 
   // Create new supplier
   create: async (supplierData) => {
-    try {
-      const response = await api.post('/inventory/suppliers', supplierData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.post("/inventory/suppliers", supplierData, {
+      auth: true,
+    });
+    return response.data;
   },
 
   // Update supplier
   update: async (id, supplierData) => {
-    try {
-      const response = await api.put(`/inventory/suppliers/${id}`, supplierData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.put(`/inventory/suppliers/${id}`, supplierData, {
+      auth: true,
+    });
+    return response.data;
   },
 
   // Delete supplier
   delete: async (id) => {
-    try {
-      const response = await api.delete(`/inventory/suppliers/${id}`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.delete(`/inventory/suppliers/${id}`, {
+      auth: true,
+    });
+    return response.data;
   },
 
   // Get supplier account statement
   getStatement: async (id) => {
     try {
-      const response = await api.get(`/inventory/suppliers/${id}/statement`);
+      const response = await api.get(`/inventory/suppliers/${id}/statement`, {
+        auth: true,
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -63,18 +57,22 @@ const supplierService = {
 
   // Record supplier payment
   recordPayment: async (id, paymentData) => {
-    try {
-      const response = await api.post(`/inventory/suppliers/${id}/payments`, paymentData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.post(
+      `/inventory/suppliers/${id}/payments`,
+      paymentData,
+      {
+        auth: true,
+      },
+    );
+    return response.data;
   },
 
   // Get supplier statistics
   getStatistics: async () => {
     try {
-      const response = await api.get('/inventory/suppliers/statistics');
+      const response = await api.get("/inventory/suppliers/statistics", {
+        auth: true,
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -84,7 +82,10 @@ const supplierService = {
   // Get suppliers by payment terms
   getByPaymentTerms: async (paymentTerms) => {
     try {
-      const response = await api.get(`/inventory/suppliers?paymentTerms=${paymentTerms}`);
+      const response = await api.get(
+        `/inventory/suppliers?paymentTerms=${paymentTerms}`,
+        { auth: true },
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -94,12 +95,14 @@ const supplierService = {
   // Search suppliers
   search: async (query) => {
     try {
-      const response = await api.get(`/inventory/suppliers/search?q=${query}`);
+      const response = await api.get(`/inventory/suppliers/search?q=${query}`, {
+        auth: true,
+      });
       return response.data;
     } catch (error) {
       throw error;
     }
-  }
+  },
 };
 
 export default supplierService;

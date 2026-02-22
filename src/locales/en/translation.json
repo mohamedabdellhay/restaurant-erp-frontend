@@ -157,7 +157,10 @@
     "category_beverage": "Beverage",
     "category_supplies": "Supplies",
     "category_other": "Other",
-    "items_below_minimum": "items below minimum stock"
+    "items_below_minimum": "items below minimum stock",
+    "critical": "Critical",
+    "low": "Low",
+    "good": "Good"
   },
   "staff": {
     "reservations_table": "Reservations",
@@ -235,6 +238,7 @@
     "subtitle": "Comprehensive analytics and insights for your restaurant",
     "overview": "Overview",
     "real_time": "Real-time",
+    "to": "to",
     "revenue": "Revenue Analytics",
     "top_items": "Top Items",
     "staff": "Staff Performance",

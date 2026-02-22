@@ -159,10 +159,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       </nav>
 
       <div className="sidebar-footer">
-        <NavLink to="/settings" className="nav-link">
-          <Settings size={22} />
-          {isOpen && <span>{t("nav.settings")}</span>}
-        </NavLink>
+        {user?.role === "admin" && (
+          <NavLink to="/settings" className="nav-link">
+            <Settings size={22} />
+            {isOpen && <span>{t("nav.settings")}</span>}
+          </NavLink>
+        )}
         <button onClick={logout} className="nav-link logout-btn">
           <LogOut size={22} />
           {isOpen && <span>{t("nav.logout")}</span>}

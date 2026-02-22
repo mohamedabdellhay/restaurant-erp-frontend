@@ -135,7 +135,7 @@ const Dashboard = () => {
               }
               className="date-input"
             />
-            <span className="filter-separator">to</span>
+            <span className="filter-separator">{t("dashboard.to")}</span>
             <input
               type="date"
               value={dateRange.to || ""}

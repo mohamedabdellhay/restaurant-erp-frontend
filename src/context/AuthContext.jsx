@@ -88,6 +88,10 @@ export const AuthProvider = ({ children }) => {
         response.data.data.restaurant?.settings;
       console.log("Final restaurant settings:", finalRestaurantSettings);
 
+      // Also store full restaurant data for other components
+      const restaurantData = response.data.data.restaurant;
+      console.log("Restaurant data:", restaurantData);
+
       const userData = {
         ...staff,
         restaurantSettings: finalRestaurantSettings,
@@ -144,6 +148,12 @@ export const AuthProvider = ({ children }) => {
             fetchError,
           );
         }
+      }
+
+      // Store full restaurant data for other components
+      if (restaurantData) {
+        localStorage.setItem("restaurant", JSON.stringify(restaurantData));
+        console.log("Stored restaurant data:", restaurantData);
       }
 
       return true;
